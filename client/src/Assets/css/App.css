@@ -1,0 +1,271 @@
+.card {
+    background-color: #fff;
+    border-radius: 10px;
+    padding: 20px;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .title {
+    font-size: 24px;
+    font-weight: 600;
+    text-align: center;
+  }
+  
+  .form {
+    margin-top: 20px;
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .group {
+    position: relative;
+  }
+  
+  .form .group label {
+    font-size: 14px;
+    color: rgb(99, 102, 102);
+    position: absolute;
+    top: -10px;
+    left: 10px;
+    background-color: #fff;
+    transition: all .3s ease;
+  }
+  
+  .form .group input,
+  .form .group textarea,
+  .form .group select {
+    padding: 10px;
+    border-radius: 5px;
+    border: 1px solid rgba(0, 0, 0, 0.2);
+    margin-bottom: 20px;
+    outline: 0;
+    width: 100%;
+    background-color: transparent;
+  }
+  
+  .form .group input:placeholder-shown+ label, .form .group textarea:placeholder-shown +label {
+    top: 10px;
+    background-color: transparent;
+  }
+  
+  .form .group input:focus,
+  .form .group textarea:focus {
+    border-color: #3366cc;
+  }
+  
+  .form .group input:focus+ label, .form .group textarea:focus +label {
+    top: -10px;
+    left: 10px;
+    background-color: #fff;
+    color: #3366cc;
+    font-weight: 600;
+    font-size: 14px;
+  }
+  
+  .form .group textarea {
+    resize: none;
+    height: 100px;
+  }
+  
+  .form button {
+    background-color: #3366cc;
+    color: #fff;
+    border: none;
+    border-radius: 5px;
+    padding: 10px;
+    font-size: 16px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+  }
+  
+  .form button:hover {
+    background-color: #27408b;
+  }
+  
+  
+
+
+
+
+
+
+  
+.search-container {
+  width: 280px;
+  display: flex;
+  flex-direction: column;
+}
+
+.sfdropdown {
+  background-color: white;
+  display: flex;
+  flex-direction: column;
+  border: 1px solid gray;
+}
+
+.sfdropdown:empty {
+  border: none;
+}
+
+.sfdropdown-row {
+  cursor: pointer;
+  color: black;
+  padding: 12px 16px;
+  text-decoration: none;
+  display: block;
+}
+
+.sfdropdown-row:hover {background-color: #f1f1f1}
+
+input {
+  width: 220px;
+}
+
+.search-inner {
+  display: flex;
+}
+
+
+#member-name:hover{
+ cursor: pointer;
+}
+
+/* CSS Tab in MemberDetail **/
+@import url('https://fonts.googleapis.com/css?family=Arimo:400,700&display=swap');
+body{
+  background:#CDDC39;
+  font-family: 'Arimo', sans-serif;
+}
+h2{
+  color:#000;
+  text-align:center;
+  font-size:2em;
+}
+.warpper{
+  display:flex;
+  flex-direction: column;
+  align-items: center;
+}
+.tab{
+  cursor: pointer;
+  padding:10px 20px;
+  margin:0px 2px;
+  background:#000;
+  display:inline-block;
+  color:#fff;
+  border-radius:3px 3px 0px 0px;
+  box-shadow: 0 0.5rem 0.8rem #00000080;
+}
+.panels{
+  background:#fffffff6;
+  box-shadow: 0 2rem 2rem #00000080;
+  min-height:200px;
+  width:100%;
+  max-width:500px;
+  border-radius:3px;
+  overflow:hidden;
+  padding:20px;  
+}
+.panel{
+  display:none;
+  animation: fadein .8s;
+}
+@keyframes fadein {
+    from {
+        opacity:0;
+    }
+    to {
+        opacity:1;
+    }
+}
+.panel-title{
+  font-size:1.5em;
+  font-weight:bold
+}
+.radio{
+  display:none;
+}
+#one:checked ~ .panels #one-panel,
+#two:checked ~ .panels #two-panel,
+#three:checked ~ .panels #three-panel{
+  display:block
+}
+#one:checked ~ .tabs #one-tab,
+#two:checked ~ .tabs #two-tab,
+#three:checked ~ .tabs #three-tab{
+  background:#fffffff6;
+  color:#000;
+  border-top: 3px solid #000;
+}
+
+/*  End css tab in MemberDetail */
+
+
+/* lable styles in EditPayment form */
+
+.label{
+  margin:10px;
+}
+.key{
+  color:tomato;
+  font-weight: 700;
+}
+
+/*handles in edit payment */
+.handle{
+  margin:5px;
+  color:red;
+  
+  font-size:16px;
+}
+
+#clanToggle{
+  float:right;
+  padding-right:200px;
+  margin-top:60px;
+}
+
+
+/*Member List.js */
+
+.margin-width-auto{
+  margin:0;
+  margin:auto;
+  width:auto;
+}
+
+.center{
+  justify-content: center;
+  align-self: center;
+}
+
+.flex{
+  display:flex;
+}
+.float-left{
+  float:left;
+}
+
+.float-right{
+  float:right;
+}
+
+/* disabled the print button */
+
+@media print {
+  /* hide irrelevant elements */
+ #hidden {
+    visibility: hidden;
+  }
+  #printableTable,
+  #printableTable * {
+    visibility: visible;
+  }
+  #printableTable {
+    position: absolute;
+    left: 0;
+    top: 0;
+  }
+}
