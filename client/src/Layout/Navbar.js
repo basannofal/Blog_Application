@@ -1,8 +1,13 @@
-import React, { useEffect } from 'react'
+import React, { useState } from 'react'
 
 const Navbar = () => {
 
-    
+    // const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+
+    // const toggleSidebar = () => {
+    //     setIsSidebarOpen(!isSidebarOpen);
+    // };
+
 
     return (
         <>
@@ -14,21 +19,25 @@ const Navbar = () => {
                 </div>
 
                 <div class="navbar-menu-wrapper d-flex" >
-                    
-                    <button class="navbar-toggler navbar-toggler align-self-center" type="button" data-toggle="minimize">
+
+                    <button class="navbar-toggler navbar-toggler align-self-center" type="button" 
+                    data-toggle="minimize" 
+                    // onClick={toggleSidebar}
+                    >
                         <span class="mdi mdi-menu"></span>
                     </button>
-
-                    <div class="search-field d-none d-xl-block">
-                        <form class="d-flex align-items-center h-100" action="#">
-                            <div class="input-group">
-                                <div class="input-group-prepend bg-transparent">
-                                    <i class="input-group-text border-0 mdi mdi-magnify"></i>
+                    {/* {isSidebarOpen && ( */}
+                        <div class="search-field d-none d-xl-block">
+                            <form class="d-flex align-items-center h-100" action="#">
+                                <div class="input-group">
+                                    <div class="input-group-prepend bg-transparent">
+                                        <i class="input-group-text border-0 mdi mdi-magnify"></i>
+                                    </div>
+                                    <input type="text" class="form-control bg-transparent border-0" placeholder="Search products" />
                                 </div>
-                                <input type="text" class="form-control bg-transparent border-0" placeholder="Search products" />
-                            </div>
-                        </form>
-                    </div>
+                            </form>
+                        </div>
+                    {/* )} */}
                 </div>
             </nav>
         </>

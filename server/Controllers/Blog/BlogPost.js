@@ -16,13 +16,18 @@ var upload = multer({
   storage: imgconfig,
 });
 
+// **************** Add Blog Post *******************
+
 router.post("/addblogpost", upload.single("blogImage"), (req, res) => {
-  console.log("***** Reached *****");
 
-  console.log(req.body);
-  console.log(req.file.filename);
 
-  const blogImage = req.file.filename;
+  const blogImage = '';
+  if (req.file == undefined) {
+
+  } else {
+    blogImage = req.file.filename;
+  }
+  console.log(blogImage);
 
   const {
     blogTitle,
@@ -33,6 +38,7 @@ router.post("/addblogpost", upload.single("blogImage"), (req, res) => {
     blogCategory,
     blogKeywords,
     blogTags,
+    blogStatus,
   } = req.body;
 
   conn.query(
@@ -47,6 +53,7 @@ router.post("/addblogpost", upload.single("blogImage"), (req, res) => {
       blog_category: blogCategory,
       blog_keywords: blogKeywords,
       blog_tags: blogTags,
+      blog_status: blogStatus,
     },
     (err, result) => {
       if (err) {
@@ -58,48 +65,187 @@ router.post("/addblogpost", upload.single("blogImage"), (req, res) => {
     }
   );
 
-  // *****$$$$@@%%%%******* here Second Example is : *****$$$$@@%%%%*******  //
-
-  // ##### To Get Values from client side through req.body or req.file  ######## //
-
-  // const blog_image = req.file.filename;
-
-  // const {
-  //     blog_title,
-  //     blog_description,
-  //     blog_content,
-  //     blog_author,
-  //     blog_publish_date,
-  //     blog_category,
-  //     blog_keywords,
-  //     blog_tags,
-  // } = req.body;
-
-  // ###### Here Query and Connection sql  ######### //
-
-  // const q = "insert into bg_blog_post (`blog_title`, `blog_description`, `blog_content`, `blog_author`, `blog_publish_date`, `blog_image`, `blog_category`, `blog_keywords`, `blog_tags`) values ( ?, ?, ?, ?, ?, ?, ?, ?, ? )";
-
-  // conn.query(q, [blog_title, blog_description, blog_content, blog_author, blog_publish_date, blog_image, blog_category, blog_keywords, blog_tags], (err, data) => {
-  //     if (err) {
-  //         console.log(err);
-  //     } else {
-  //         res.send(data);
-  //         console.log(data);
-  //         console.log("Data Added");
-  //     }
-  // })
-
-  // ####### here this code is write inside insert query  ######## //
-
-  // blog_title: blog_title,
-  // blog_description: blog_description,
-  // blog_content: blog_content,
-  // blog_author: blog_author,
-  // blog_publish_date: blog_publish_date,
-  // blog_image: blog_image,
-  // blog_category: blog_category,
-  // blog_keywords: blog_keywords,
-  // blog_tags: blog_tags,
 });
+
+// ************ Get Blog Post **********************
+
+router.get("/getblogposts", (req, res) => {
+  console.log("****** Reached *******");
+
+  const q =
+    "SELECT *, DATE_FORMAT(DATE(blog_publish_date), '%d-%m-%Y') AS blog_publish_date, TIME_FORMAT(blog_time, '%r') AS blog_time FROM bg_blog_post where  blog_delete_status 	= ? order by id desc ";
+
+  const flag = true;
+
+  conn.query(q, [flag], (err, data) => {
+    if (err) {
+      console.log(err);
+    } else {
+      res.send(data);
+    }
+  });
+});
+
+
+
+// ************ Get Blog Post **********************
+
+router.get("/gettrashblogpost", (req, res) => {
+  console.log("****** Reached *******");
+
+  const q =
+    "SELECT *, DATE_FORMAT(DATE(blog_publish_date), '%d-%m-%Y') AS blog_publish_date FROM bg_blog_post where  blog_delete_status 	= ? order by id desc ";
+
+  const flag = false;
+
+  conn.query(q, [flag], (err, data) => {
+    if (err) {
+      console.log(err);
+    } else {
+      res.send(data);
+    }
+  });
+});
+
+
+// ********* Move On Blog Post ******
+
+router.patch("/trashblogpost/:id", (req, res) => {
+  const q = "UPDATE `bg_blog_post` SET `blog_delete_status`= ? WHERE id = ?";
+  const values = [
+    false,
+    req.params.id
+  ]
+  conn.query(q, values, (err, data) => {
+    if (err) {
+      console.log(err);
+    } else {
+      res.send(data);
+    }
+  });
+})
+
+
+// ********* Get back from trash Blog Post ******
+
+router.patch("/trashbackblogpost/:id", (req, res) => {
+  const q = "UPDATE `bg_blog_post` SET `blog_delete_status`= ? WHERE id = ?";
+  const values = [
+    true,
+    req.params.id
+  ]
+  conn.query(q, values, (err, data) => {
+    if (err) {
+      console.log(err);
+    } else {
+      res.send(data);
+    }
+  });
+})
+
+
+
+
+
+// ********* Delete Blog Post ******
+
+router.delete("/deletepost/:id", (req, res) => {
+
+  const q = "DELETE FROM `bg_blog_post` WHERE id = ?";
+  const values = [
+    req.params.id
+  ]
+  conn.query(q, values, (err, data) => {
+    if (err) {
+      console.log(err);
+    } else {
+      res.send(data);
+    }
+  });
+})
+
+
+
+
+// ********* Get Blog Post detail ******
+
+router.get("/getblogpostdetail/:id", (req, res) => {
+
+  const q = "SELECT *, DATE_FORMAT(DATE(blog_publish_date), '%Y-%m-%d') AS blog_publish_date FROM `bg_blog_post` WHERE id = ?";
+  const values = [
+    req.params.id
+  ]
+  conn.query(q, values, (err, data) => {
+    if (err) {
+      console.log(err);
+    } else {
+      res.send(data);
+    }
+  });
+})
+
+
+
+// ************** update Blog Post *****************
+
+router.patch("/editblogpost/:id", upload.single("blogImage"), (req, res) => {
+
+
+  let blogImage = '';
+
+  if (req.file == undefined) {
+    blogImage = req.body.blogImage
+  } else {
+    blogImage = req.file.filename;
+  }
+
+
+  const {
+    blogTitle,
+    blogDesc,
+    blogContent,
+    blogAuthor,
+    blogPublishDate,
+    blogCategory,
+    blogKeywords,
+    blogTags,
+    blogStatus,
+  } = req.body;
+
+
+
+  const q = "UPDATE `bg_blog_post` SET `blog_title`= ?, `blog_description`= ?, `blog_content`= ?, `blog_author`= ?, `blog_publish_date`= ?, `blog_image`= ?, `blog_category`= ?, `blog_status`= ?, `blog_keywords`= ?, `blog_tags`= ? WHERE id = ?";
+
+
+  const id = req.params.id;
+  const values = [
+    blogTitle,
+    blogDesc,
+    blogContent,
+    blogAuthor,
+    blogPublishDate,
+    blogImage,
+    blogCategory,
+    blogStatus,
+    blogKeywords,
+    blogTags,
+    id
+  ]
+
+  console.log(values);
+
+
+  conn.query(q, values, (err, data) => {
+    if (err) {
+      console.log(err);
+      return res.json(err)
+    };
+    return res.json(data);
+  });
+
+});
+
+
+
 
 module.exports = router;

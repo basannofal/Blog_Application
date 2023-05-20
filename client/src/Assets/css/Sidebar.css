@@ -681,7 +681,7 @@
     -moz-transition: width 0.25s ease, background 0.25s ease;
     -ms-transition: width 0.25s ease, background 0.25s ease;
     background: #181824;
-    width: 258px;
+    width: 220px;
     height: 64px; }
     @media (max-width: 991px) {
       .navbar .navbar-brand-wrapper {
@@ -1091,7 +1091,7 @@
   background: #181824;
   font-family: 'Signika Negative', sans-serif;
   padding: 0;
-  width: 258px;
+  width: 220px;
   z-index: 11;
   transition: width 0.25s ease, background 0.25s ease;
   -webkit-transition: width 0.25s ease, background 0.25s ease;
@@ -1716,7 +1716,7 @@
 .main-panel {
   -webkit-transition: width 0.25s ease, margin 0.25s ease;
   transition: width 0.25s ease, margin 0.25s ease;
-  width: calc(100% - 258px);
+  width: calc(100% - 220px);
   min-height: calc(100vh - 64px);
   display: -webkit-box;
   display: -ms-flexbox;
@@ -1740,3 +1740,7 @@
   @media (max-width: 991px) {
     .content-wrapper {
       padding: 2rem 1rem; } }
+
+.w {
+  width: 120px;
+}

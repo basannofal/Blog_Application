@@ -269,3 +269,14 @@ h2{
     top: 0;
   }
 }
+
+.blog-title .tred {
+  cursor: pointer;
+  display: none;
+}
+
+.blog-title:hover > td > .tred {
+  cursor: pointer;
+  display: block;
+}
+

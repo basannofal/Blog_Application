@@ -1,6 +1,6 @@
-const express = require("express");
-const router = express.Router();
-const blogPost = require('../../Controllers/Blog/BlogPost');
+// const express = require("express");
+// const router = express.Router();
+// const blogPost = require('../../Controllers/Blog/BlogPost');
 
 
 // const multer = require('multer');
@@ -20,6 +20,6 @@ const blogPost = require('../../Controllers/Blog/BlogPost');
 
 
 // router.route("/addblogpost", upload.single('blog_image')).post(blogPost.addBlogPost);
-router.route("/getblogpost").get(blogPost.getBlogPost);
+// router.route("/getblogposts").get(blogPost.getBlogPost);
 
-module.exports = router;
+// module.exports = router;

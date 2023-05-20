@@ -1,4 +1,5 @@
 import React, { useState } from 'react'
+import { NavLink } from 'react-router-dom';
 
 
 export const Sidebars = () => {
@@ -13,51 +14,19 @@ export const Sidebars = () => {
                 <ul class="nav">
                     <li class="nav-item nav-category">Main</li>
                     <li class="nav-item">
-                        <a class="nav-link" href="/">
+                        <NavLink to={'/'} className='text-decoration-none '><p className="nav-link my-0">
                             <span class="icon-bg">
                                 <i className='mdi mdi-view-dashboard menu-icon'></i>
                             </span>
                             <span class="menu-title">Dashboard</span>
-                        </a>
+                        </p>
+                        </NavLink>
                     </li>
-                    {/* <li class="nav-item">
-                        <a class="nav-link" data-bs-toggle="collapse" href="#ui-basic" aria-expanded="false" aria-controls="ui-basic">
-                            <span class="icon-bg">
-                                <i class="mdi mdi-format-list-bulleted menu-icon"></i>
-                            </span>
-                            <span class="menu-title">UI Elements</span>
-                            <i class="menu-arrow"></i>
-                        </a>
-                        <div class="collapse" id="ui-basic">
-                            <ul class="nav flex-column sub-menu">
-                                <li class="nav-item"> <a class="nav-link" href="pages/ui-features/buttons.html">Buttons</a></li>
-                                <li class="nav-item"> <a class="nav-link" href="pages/ui-features/dropdowns.html">Dropdowns</a></li>
-                                <li class="nav-item"> <a class="nav-link" href="pages/ui-features/typography.html">Typography</a></li>
-                            </ul>
-                        </div>
-                    </li> */}
-
-                    {/* <li className="nav-item">
-                        <a
-                            className="nav-link"
-                            data-bs-toggle="collapse"
-                            href="#ui-basic"
-                            aria-expanded="false"
-                            aria-controls="ui-basic"
-                        >
-                            <span className="icon-bg">
-                                <i className="mdi mdi-format-list-bulleted menu-icon"></i>
-                            </span>
-                            <span className="menu-title">UI Elements</span>
-                            <i className="bi bi-arrow-down-short menu-arrow"></i>
-                        </a>
-                    </li> */}
 
                     <li className="nav-item">
                         <a
                             className="nav-link"
                             data-bs-toggle="collapse"
-                            href="#ui-basic"
                             aria-expanded={isDropdownOpen ? 'true' : 'false'}
                             aria-controls="ui-basic"
                             onClick={toggleDropdown}
@@ -70,24 +39,30 @@ export const Sidebars = () => {
                         </a>
                     </li>
                     {isDropdownOpen && (
-                        <li className="nav-item">
-                            <a className="nav-link" href="addblogcategory">
-                            <i class="bi bi-arrow-right-short"></i> <span style={{paddingLeft: '20px'}}> Blog Category </span>
-                            </a>
+                        <li className="nav-item ">
+                            <NavLink to={'/allblogpost'} className='text-decoration-none '><p className="nav-link m-0 p-1">
+                                <i class="bi bi-arrow-right-short"></i> <span style={{ paddingLeft: '20px' }}> All Posts </span>
+                            </p></NavLink>
                         </li>
                     )}
                     {isDropdownOpen && (
                         <li className="nav-item">
-                            <a className="nav-link" href="allblogpost">
-                            <i class="bi bi-arrow-right-short"></i> <span style={{paddingLeft: '20px'}}> Blog Info </span>
-                            </a>
+                            <NavLink to={'/addblogpost'} className='text-decoration-none '><p className="nav-link m-0 p-1">
+                                <i class="bi bi-arrow-right-short"></i> <span style={{ paddingLeft: '20px' }}> Add New </span>
+                            </p></NavLink>
+                        </li>
+                    )}
+                    {isDropdownOpen && (
+                        <li className="nav-item">
+                            <NavLink to={'/addblogcategory'} className='text-decoration-none'><p className="nav-link m-0 p-1"><i class="bi bi-arrow-right-short"></i> <span style={{ paddingLeft: '20px' }}> Category </span>
+                            </p></NavLink>
                         </li>
                     )}
 
                     <li class="nav-item">
                         <a class="nav-link" href="pages/icons/mdi.html">
                             <span class="icon-bg">
-                                <i className='uil uil-estate'></i>
+                                <i className='uil uil-estate  menu-icon'></i>
                             </span>
                             <span class="menu-title">Icons</span>
                         </a>
@@ -170,3 +145,4 @@ export const Sidebars = () => {
 }
 
 export default Sidebars;
+

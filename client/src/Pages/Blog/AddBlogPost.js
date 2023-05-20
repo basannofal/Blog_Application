@@ -8,9 +8,7 @@ import 'react-draft-wysiwyg/dist/react-draft-wysiwyg.css';
 import { convertToHTML } from 'draft-convert';
 
 const AddBlogPost = () => {
-
-    const editorRef = useRef(null);
-
+    const navigate = useNavigate();
     // Store Input Date in this State
     const [blogTitle, setBlogTitle] = useState("");
     const [blogDesc, setBlogDesc] = useState("");
@@ -19,15 +17,13 @@ const AddBlogPost = () => {
     const [blogPublishDate, setBlogPublishDate] = useState("");
     const [blogImage, setBlogImage] = useState("");
     const [blogCategory, setBlogCategory] = useState("");
-    const [blogKeywords, setBlogKeywords] = useState("");
+    const [blogKeywords, setBlogKeywords] = useState([]);
     const [blogTags, setBlogTags] = useState("");
+    // const [blogStatus, setBlogStatus] = useState(1);
 
     // Store the Category Data in this State
     const [category, setCategory] = useState([]);
 
-    const handleBlogContent = (newContent) => {
-        setBlogContent(newContent);
-    };
     // Get Category Data
     const getData = async () => {
         try {
@@ -64,8 +60,32 @@ const AddBlogPost = () => {
 
 
 
+    // keyword 
+
+    // Function to handle Enter key press
+    const handleKeyword = (event) => {
+        if (event.key === 'Enter' || event.key == ",") {
+            // Add the entered keyword to the keywords array
+            event.preventDefault();
+            setBlogKeywords([...blogKeywords, event.target.value]);
+            console.log(event.target.value);
+            console.log(blogKeywords);
+            // Clear the input field
+            event.target.value = '';
+        }
+
+    };
+
+    const RemoveKeyword = (idx) => {
+
+        const newArray = [...blogKeywords];
+        newArray.splice(idx, 1);
+        setBlogKeywords(newArray)
+    }
+
+
     // Save the data in database
-    const savedata = async (e) => {
+    const savedata = async (e, blogStatus) => {
         e.preventDefault();
 
         try {
@@ -81,6 +101,7 @@ const AddBlogPost = () => {
             formdata.append("blogCategory", blogCategory);
             formdata.append("blogKeywords", blogKeywords);
             formdata.append("blogTags", blogTags);
+            formdata.append("blogStatus", blogStatus);
 
             const res = axios.post("/addblogpost", formdata);
 
@@ -88,13 +109,13 @@ const AddBlogPost = () => {
                 window.alert("Blog is not Inserted 😂");
             } else {
                 window.alert("Blog is Inserted Successfully 👍");
-                window.reload();
+                navigate('/allblogpost', { replace: true })
             }
         } catch (e) {
             console.log(e);
         }
     };
-
+ 
     return (
         <>
             <div class="container-scroller">
@@ -142,7 +163,6 @@ const AddBlogPost = () => {
                             <form
                                 encType="multipart/form-data"
                                 method="POST"
-                                onSubmit={savedata}
                             >
                                 <div className="row">
                                     <div className="col-lg-8">
@@ -185,7 +205,7 @@ const AddBlogPost = () => {
                                                             }}
                                                             required
                                                         />
-                                                        <label for="name">Blog Description</label>
+                                                        <label for="name">Meta Description</label>
                                                     </div>
                                                 </div>
                                             </div>
@@ -196,11 +216,6 @@ const AddBlogPost = () => {
                                             <div class="dash-content mt-0">
                                                 <div class="card rounded-0">
                                                     <div class="form" >
-
-
-
-
-
 
                                                         <div class="group ">
                                                             <input
@@ -253,6 +268,7 @@ const AddBlogPost = () => {
                                                                     setBlogCategory(e.target.value);
                                                                 }}
                                                             >
+                                                                <option selected>Select Blog Category</option>
                                                                 {category.map((e) => {
                                                                     return (
                                                                         <>
@@ -265,18 +281,25 @@ const AddBlogPost = () => {
 
                                                         <div class="group">
                                                             <input
-                                                                placeholder=""
                                                                 type="text"
-                                                                value={blogKeywords}
-                                                                onChange={(e) => {
-                                                                    setBlogKeywords(e.target.value);
-                                                                }}
-                                                                required
+                                                                onKeyDown={handleKeyword}
                                                             />
                                                             <label for="name">Blog Keywords</label>
+
+                                                            <div className="container">
+                                                                {blogKeywords.map((keyword, index) => (
+
+                                                                        <div key={index} className=" row bg-light py-2 mb-2"  >
+                                                                            <div className="col-lg-10" >{keyword}</div>
+                                                                            <div className="col-lg-2" >
+                                                                                <i class="bi bi-x-circle" onClick={() => { RemoveKeyword(index) }}></i>
+                                                                            </div>
+                                                                        </div>
+                                                                ))}
+                                                            </div>
                                                         </div>
 
-                                                        <div class="group">
+                                                        <div class="group mt-3">
                                                             <input
                                                                 placeholder=""
                                                                 type="text"
@@ -289,7 +312,10 @@ const AddBlogPost = () => {
                                                             <label for="name">Blog Tags</label>
                                                         </div>
 
-                                                        <button type="submit">Submit</button>
+                                                        <div className="row">
+                                                            <button className="col-lg-5 ml-2" type="submit" onClick={(e) => savedata(e, 1)}>Publish</button>
+                                                            <button className="col-lg-5 ml-4" type="submit" onClick={(e) => savedata(e, 0)}  >Save Draft</button>
+                                                        </div>
                                                     </div>
                                                 </div>
                                             </div>

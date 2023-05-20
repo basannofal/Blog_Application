@@ -1,67 +1,74 @@
 import axios from "axios";
 import React, { useEffect, useState } from "react";
-import { NavLink } from "react-router-dom";
+import { Link, NavLink } from "react-router-dom";
 import Sidebars from "../../Layout/Sidebars";
 
 const AllBlogPost = () => {
-  const [clan, setClan] = useState([]);
+
+  const [blogCategory, setBlogCategory] = useState([]);
+  const [blogPost, setBlogPost] = useState([]);
   const [searchFilter, setSearchFilter] = useState("");
   const [currentPage, setCurrentPage] = useState(0);
-  const [order, setOrder] = useState("ASC");
+  const [pb, setPb] = useState(0)
+  const [df, setDf] = useState(0)
+  let published = 0;
+  let draft = 0;
 
-  const sorting = (col) => {
-    if (order === "ASC") {
-      const sorted = [...clan].sort((a, b) =>
-        a[col].toLowerCase() > b[col].toLowerCase() ? 1 : -1
-      );
-      setClan(sorted);
-      setOrder("DSC");
-    }
+  const getPosts = async () => {
+    try {
+      const res = await axios.get('/getblogposts');
+      setBlogPost(res.data)
+      console.log(res.data);
 
-    if (order === "DSC") {
-      const sorted = [...clan].sort((a, b) =>
-        a[col].toLowerCase() < b[col].toLowerCase() ? 1 : -1
-      );
-      setClan(sorted);
-      setOrder("ASC");
+      res.data.map((e, idx) => {
+        if (e.blog_status) {
+          published = published + 1;
+        } else {
+          draft = draft + 1;
+        }
+      })
+      setPb(published)
+      setDf(draft)
+    } catch (err) {
+      console.log(err);
     }
-  };
+  }
 
   const getData = async () => {
     try {
-      const res = await axios.get(`/getclan`);
-      setClan(res.data);
+      const res = await axios.get(`/getblogcategory`);
+      setBlogCategory(res.data);
       console.log(res.data);
     } catch (error) {
       console.log(error);
     }
   };
 
+
   useEffect(() => {
+    getPosts();
     getData();
   }, []);
 
-  const deleteClan = async (id) => {
+  const trashBlogPost = async (id) => {
     try {
-      console.log(id);
-      const res = await axios.delete(`/deleteclan/${id}`);
-
-      getData();
+      const res = await axios.patch(`/trashblogpost/${id}`);
+      getPosts();
     } catch (error) {
       window.alert(error);
     }
   };
 
-  const itemPerPage = 4;
+  const itemPerPage = 10;
 
-  const numberOfPage = Math.ceil(clan.length / itemPerPage);
+  const numberOfPage = Math.ceil(blogPost.length / itemPerPage);
   const pageIndex = Array.from({ length: numberOfPage }, (_, idx) => idx + 1);
 
   const handlePageChange = (pageNumber) => {
     setCurrentPage(pageNumber);
   };
 
-  const rows = clan.slice(
+  const rows = blogPost.slice(
     currentPage * itemPerPage,
     (currentPage + 1) * itemPerPage
   );
@@ -114,7 +121,7 @@ const AllBlogPost = () => {
           <div class="main-panel">
             <div class="content-wrapper">
               <section>
-                <div class="dash-content  pt-3">
+                <div class="dash-content">
                   <div class="overview">
                     <div
                       class="title"
@@ -135,70 +142,83 @@ const AllBlogPost = () => {
                             class="uil uil-plus mr-2"
                             style={{ backgroundColor: "#007bff" }}
                           ></i>
-                          Add New Blog
+                          New Post
                         </button>
                       </NavLink>
                     </div>
                   </div>
 
                   <div class="activity">
-                    <div class="title mt-0">
-                      <span class="text">All Clan</span>
-                    </div>
 
-                    <table class="table table-striped">
+                    <p class="mb-3" style={{ fontSize: 20, fontWeight: "bold" }}>All Blog Post </p>
+
+                    <div className="d-flex" style={{ fontSize: "14px" }}>
+                      <p>All ({df + pb})</p>
+                      <p className="mx-2">|</p>
+                      <p>Published ({pb})</p>
+                      <p className="mx-2">|</p>
+                      <p>Draft ({df})</p>
+                      <p className="mx-2">|</p>
+                      <NavLink to={'/alltrashblogpost'} className='text-decoration-none'><p className="text-danger">Trash</p></NavLink>
+
+                    </div>
+                    <table class="table table-striped" style={{ border: "1px solid #C3C4C7", backgroundColor: "#fff" }}>
                       <thead>
                         <tr>
-                          <th scope="col">ID</th>
-                          <th
-                            style={{ cursor: "pointer" }}
-                            onClick={() => sorting("clan_name")}
-                          >
-                            Clan Name <i class="bi bi-funnel-fill"></i>
-                          </th>
-                          <th scope="col">Parent Clan</th>
-                          <th scope="col">Handle</th>
+                          <th scope="col">Blog Title</th>
+                          <th scope="col">Blog Author</th>
+                          <th scope="col">Blog Category</th>
+                          <th scope="col">Blog Tags</th>
+                          <th scope="col">Blog Publish Date</th>
                         </tr>
                       </thead>
-                      <tbody>
+                      <tbody style={{ fontSize: '15px' }}>
                         {rows.length > 0
                           ? rows
+                            .filter((item) => {
+                              const searchTerm = searchFilter.toLowerCase();
+                              return item.blog_title.startsWith(searchTerm) || item.blog_author.startsWith(searchTerm) || item.blog_tags.startsWith(searchTerm) || item.blog_publish_date.startsWith(searchTerm);
+                            })
 
-                              .filter((item) => {
-                                const searchTerm = searchFilter.toLowerCase();
-                                return item.clan_name.startsWith(searchTerm);
-                              })
+                            .map((e, idx) => {
+                              let flag = 0;
 
-                              .map((e, idx) => {
-                                let flag = 0;
-                                return (
-                                  <>
-                                    <tr>
-                                      <th scope="row">{e.id}</th>
-                                      <td>{e.clan_name}</td>
-                                      <td>
-                                        {clan.map((x) => {
-                                          if (e.parent_clan === x.id) {
-                                            flag = 1;
-                                            return x.clan_name;
-                                          }
-                                        })}
-                                        {flag === 0 ? "null" : ""}
-                                      </td>
-                                      <td>
-                                        <button
-                                          className="btn btn-danger"
-                                          onClick={() => {
-                                            deleteClan(e.id);
-                                          }}
-                                        >
-                                          Delete
-                                        </button>
-                                      </td>
-                                    </tr>
-                                  </>
-                                );
-                              })
+
+                              return (
+                                <>
+                                  <tr className="blog-title">
+                                    <td style={{ width: "33%" }}>
+                                      {e.blog_title}
+                                      <p className="p-0 m-0 tred " style={{ fontSize: '14px' }}>
+                                        <div className="d-flex">
+
+                                          <Link to={`/editblogpost`} state={{ id: e.id, content: e.blog_content }} className='text-decoration-none'><p className="p-0 m-0">Edit | </p></Link>
+                                          <p className="text-danger p-0 m-0" onClick={() => { trashBlogPost(e.id) }}>&nbsp;Trash</p>
+                                        </div>
+                                      </p>
+                                    </td>
+                                    <td>{e.blog_author}</td>
+                                    <td>
+                                      {blogCategory.map((x) => {
+                                        if (e.blog_category === x.id) {
+                                          flag = 1;
+                                          return x.category_name;
+                                        }
+                                      })}
+                                      {flag === 0 ? "null" : ""}
+                                    </td>
+                                    <td>{e.blog_tags}</td>
+                                    <td>
+                                      {
+                                        e.blog_status == 0 ? <p className="m-0 p-0">Draft</p> : <p className="m-0 p-0">Published</p>
+                                      }
+                                      {e.blog_publish_date} {e.blog_time}
+                                    </td>
+
+                                  </tr >
+                                </>
+                              );
+                            })
                           : ""}
                       </tbody>
                     </table>
@@ -252,8 +272,8 @@ const AllBlogPost = () => {
               </section>
             </div>
           </div>
-        </div>
-      </div>
+        </div >
+      </div >
     </>
   );
 };
