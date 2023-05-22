@@ -112,11 +112,29 @@ const EditBlogPost = () => {
         getData();
     }, []); // Empty dependency array
 
+
+
+
+    const blockToHTML = (block) => {
+        if (block.type === 'code') {
+            return <div><code>{block.text}</code></div>;
+        }
+        // Handle other block types if needed
+    };
+
+    const options = {
+        blockToHTML,
+    };
+
+    // ...
+
+
+
+
     useEffect(() => {
-        // getBlogDetail()
-        // getData();
-        let html = convertToHTML(editorState.getCurrentContent());
+        const html = convertToHTML(options)(editorState.getCurrentContent());
         setConvertedContent(html);
+
     }, [editorState]);
 
 

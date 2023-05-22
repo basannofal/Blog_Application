@@ -6,6 +6,8 @@
   "dependencies": {
     "@ckeditor/ckeditor5-build-classic": "^37.1.0",
     "@ckeditor/ckeditor5-react": "^6.0.0",
+    "@cloudinary/react": "^1.11.2",
+    "@cloudinary/url-gen": "^1.10.0",
     "@editorjs/checklist": "^1.5.0",
     "@testing-library/jest-dom": "^5.16.5",
     "@testing-library/react": "^13.4.0",
@@ -23,6 +25,7 @@
     "react-quill": "^2.0.0",
     "react-router-dom": "^6.11.1",
     "react-scripts": "5.0.1",
+    "slugify": "^1.6.6",
     "web-vitals": "^2.1.4"
   },
   "scripts": {

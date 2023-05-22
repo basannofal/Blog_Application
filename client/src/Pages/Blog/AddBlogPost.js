@@ -1,17 +1,20 @@
 import axios from "axios";
-import React, { useEffect, useState, useRef } from "react";
+import React, { useEffect, useState, useRef, useCallback } from "react";
 import { NavLink, useNavigate, useParams } from "react-router-dom";
 import Sidebars from "../../Layout/Sidebars";
 import { EditorState, convertToRaw, convertFromRaw } from 'draft-js';
 import { Editor } from 'react-draft-wysiwyg';
 import 'react-draft-wysiwyg/dist/react-draft-wysiwyg.css';
 import { convertToHTML } from 'draft-convert';
+import slugify from 'slugify';
+
 
 const AddBlogPost = () => {
     const navigate = useNavigate();
     // Store Input Date in this State
     const [blogTitle, setBlogTitle] = useState("");
     const [blogDesc, setBlogDesc] = useState("");
+    const [blogSlug, setBlogSlug] = useState('');
     const [blogContent, setBlogContent] = useState("");
     const [blogAuthor, setBlogAuthor] = useState("");
     const [blogPublishDate, setBlogPublishDate] = useState("");
@@ -46,10 +49,27 @@ const AddBlogPost = () => {
         setEditorState(newEditorState);
     };
 
+
+
+    const blockToHTML = (block) => {
+        if (block.type === 'code') {
+            return <code>{block.text}</code>;
+        }
+        // Handle other block types if needed
+    };
+
+    const options = {
+        blockToHTML,
+    };
+
+    // ...
+
     useEffect(() => {
         getData();
-        let html = convertToHTML(editorState.getCurrentContent());
+
+        const html = convertToHTML(options)(editorState.getCurrentContent());
         setConvertedContent(html);
+
     }, [editorState]);
 
 
@@ -102,6 +122,7 @@ const AddBlogPost = () => {
             formdata.append("blogKeywords", blogKeywords);
             formdata.append("blogTags", blogTags);
             formdata.append("blogStatus", blogStatus);
+            formdata.append("blogSlug", blogSlug);
 
             const res = axios.post("/addblogpost", formdata);
 
@@ -115,7 +136,101 @@ const AddBlogPost = () => {
             console.log(e);
         }
     };
- 
+
+
+
+    const generateSlug = (blogTitle) => {
+        const options = {
+            replacement: '-',  // Replace spaces with -
+            remove: /[*+~.()'"!:@]/g,  // Remove special characters
+            lower: true  // Convert to lowercase
+        };
+        const newSlug = slugify(blogTitle, options);
+        setBlogSlug(newSlug);
+    };
+
+
+    const checkSlugAvailability = async (slug) => {
+        try {
+            const response = await axios.get(`/checkSlugAvailability/${slug}`);
+            const { isAvailable } = response.data;
+
+            // Handle the response accordingly
+            if (isAvailable) {
+                // Slug is available
+                incrementSlug(blogSlug)
+                console.log("Slug is available");
+            } else {
+                // Slug is not available
+                console.log("Slug is not available");
+            }
+        } catch (error) {
+            // Handle any errors
+            console.error("Error checking slug availability:", error);
+        }
+    };
+
+    const incrementSlug = (slug) => {
+        const lastChar = slug[slug.length - 1];
+        
+        if (!isNaN(lastChar)) {
+          // Last character is a number, increment it by 1
+          const newLastChar = parseInt(lastChar, 10) + 1;
+          setBlogSlug(slug.slice(0, -1) + newLastChar);
+        } else {
+          // Last character is an alphabet, append '1' to the slug
+          setBlogSlug(slug + '1');
+        }
+      };
+      
+
+
+    useEffect(() => {
+        checkSlugAvailability(blogSlug);
+    }, [blogSlug]);
+
+    // / upload our own server
+    // uploadCallback = (file) => {
+    //     return new Promise((resolve, reject) => {
+    //        const data = new FormData();
+    //        data.append("storyImage", file)
+    //        axios.post(Upload file API call, data).then(responseImage => {
+    //             resolve({ data: { link: PATH TO IMAGE ON SERVER } });
+    //        })
+    //     });
+    // }
+
+    // const uploadimagecallback = () => {}
+    //  const uploadFile = (file) => {
+    //     return new Promise(
+    //         (resolve, reject) => {
+
+
+    //             const xhr = new XMLHttpRequest();
+    //             xhr.open('POST', 'https://api.imgur.com/3/image');
+    //             xhr.setRequestHeader('Authorization', 'Client-ID 506e1a6dc89c9ab');
+    //             const data = new FormData();
+    //             data.append('image', file);
+    //             xhr.send(data);
+    //             xhr.addEventListener('load', () => {
+    //                 const res = JSON.parse(xhr.responseText);
+    //                 console.log(res);
+    //                 resolve(res);
+    //             })
+
+    //             xhr.addEventListener('error', () => {
+    //                 const error = JSON.parse(xhr.responseText);
+    //                 console.log(error);
+    //                 reject(error);
+    //             })
+    //         }
+    //     );
+    // }
+
+
+
+
+
     return (
         <>
             <div class="container-scroller">
@@ -178,6 +293,7 @@ const AddBlogPost = () => {
                                                             value={blogTitle}
                                                             onChange={(e) => {
                                                                 setBlogTitle(e.target.value);
+                                                                generateSlug(e.target.value)
                                                             }}
                                                             required
                                                         />
@@ -191,6 +307,14 @@ const AddBlogPost = () => {
                                                             toolbarClassName="toolbarClassName"
                                                             wrapperClassName="wrapperClassName"
                                                             editorClassName="editorClassName"
+                                                        // toolbar={{
+                                                        //     image: {
+                                                        //         uploadCallback: uploadFile,
+                                                        //         alt: { present: true, mandatory: false },
+                                                        //         previewImage: true,
+                                                        //         inputAccept: 'image/gif,image/jpeg,image/jpg,image/png,image/svg',
+                                                        //     }
+                                                        // }}
                                                         />
                                                     </div>
 
@@ -289,12 +413,12 @@ const AddBlogPost = () => {
                                                             <div className="container">
                                                                 {blogKeywords.map((keyword, index) => (
 
-                                                                        <div key={index} className=" row bg-light py-2 mb-2"  >
-                                                                            <div className="col-lg-10" >{keyword}</div>
-                                                                            <div className="col-lg-2" >
-                                                                                <i class="bi bi-x-circle" onClick={() => { RemoveKeyword(index) }}></i>
-                                                                            </div>
+                                                                    <div key={index} className=" row bg-light py-2 mb-2"  >
+                                                                        <div className="col-lg-10" >{keyword}</div>
+                                                                        <div className="col-lg-2" >
+                                                                            <i class="bi bi-x-circle" onClick={() => { RemoveKeyword(index) }}></i>
                                                                         </div>
+                                                                    </div>
                                                                 ))}
                                                             </div>
                                                         </div>
@@ -310,6 +434,21 @@ const AddBlogPost = () => {
                                                                 required
                                                             />
                                                             <label for="name">Blog Tags</label>
+                                                        </div>
+
+
+                                                        <div class="group mt-3">
+                                                            <input
+                                                                placeholder=""
+                                                                type="text"
+                                                                value={blogSlug}
+                                                                onChange={(e) => {
+                                                                    setBlogSlug(e.target.value);
+                                                                    generateSlug(e.target.value)
+                                                                }}
+                                                                required
+                                                            />
+                                                            <label for="name">Blog Slug</label>
                                                         </div>
 
                                                         <div className="row">
@@ -332,124 +471,3 @@ const AddBlogPost = () => {
 };
 
 export default AddBlogPost;
-
-// Second Style Add Blog Post Code here.............
-
-//******* Set State Code ********//
-
-// const [blogPost, setBlogPost] = useState({
-//     blog_title: "",
-//     blog_description: "",
-//     blog_content: "",
-//     blog_author: "",
-//     blog_publish_date: "",
-//     blog_image: "",
-//     blog_category: "",
-//     blog_keywords: "",
-//     blog_tags: "",
-// });
-
-//********* handle inputs code **********//
-
-// let name, value;
-// const handleInputs = (e) => {
-//     name = e.target.name;
-//     value = e.target.value;
-
-//     setBlogPost({ ...blogPost, [name]: value });
-//     console.log(blogPost);
-// };
-
-//****** handle image Code ******//
-
-// const handleImage = (e) => {
-//     setBlogPost({ ...blogPost, blog_image: e.target.files[0] });
-// };
-
-// ******  Form Data Append Code ******* //
-
-// formdata.append("blog_title", blogPost.blog_title);
-// formdata.append("blog_description", blogPost.blog_description);
-// formdata.append("blog_content", blogPost.blog_content);
-// formdata.append("blog_author", blogPost.blog_author);
-// formdata.append("blog_publish_date", blogPost.blog_publish_date);
-// formdata.append("blog_image", blogPost.blog_image);
-// formdata.append("blog_category", blogPost.blog_category);
-// formdata.append("blog_keywords", blogPost.blog_keywords);
-// formdata.append("blog_tags", blogPost.blog_tags);
-
-//******* Input Field on this Code *******//
-
-{
-    /* <div class="group">
-            <input placeholder="" type="text" name='blog_title' onChange={handleInputs} required />
-            <label for="name">Blog Title</label>
-        </div> */
-}
-
-{
-    /* <div class="group">
-            <input placeholder="" type="text" name='blog_description' onChange={handleInputs} required />
-            <label for="name">Blog Desc</label>
-        </div> */
-}
-
-{
-    /* <div class="group">
-            <input placeholder="" type="text" name='blog_content' onChange={handleInputs} required />
-            <label for="name">Blog Content</label>
-        </div> */
-}
-
-{
-    /* <div class="group">
-            <input placeholder="" type="text" name='blog_author' onChange={handleInputs} required />
-            <label for="name">Blog Author</label>
-        </div> */
-}
-
-{
-    /* <div class="group">
-            <input placeholder="" type="date" name='blog_publish_date' onChange={handleInputs} required />
-            <label for="name">Blog Date</label>
-        </div> */
-}
-
-{
-    /* <div class="group">
-            <input placeholder="" name="blog_image" type="file" onChange={handleImage} required />
-            <label for="name">Blog Image</label>
-        </div> */
-}
-
-{
-    /* <div className="group">
-            <label for="exampleInputEmail1">Select Blog Category</label>
-            <select name="blog_category" placeholder='' id="blog_category" onChange={handleInputs} >
-                <option value="Null">Null</option>
-                {
-                    post.map((e) => {
-                        return (
-                            <>
-                                <option value={e.id}>{e.category_name}</option>
-                            </>
-                        )
-                    })
-                }
-            </select>
-        </div> */
-}
-
-{
-    /* <div class="group">
-      <input placeholder="" type="text" name='blog_keywords' onChange={handleInputs} required />
-      <label for="name">Blog Keywords</label>
-  </div> */
-}
-
-{
-    /* <div class="group">
-      <input placeholder="" type="text" name='blog_tags' onChange={handleInputs} required />
-      <label for="name">Blog Tags</label>
-  </div> */
-}

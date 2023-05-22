@@ -21,7 +21,7 @@ var upload = multer({
 router.post("/addblogpost", upload.single("blogImage"), (req, res) => {
 
 
-  const blogImage = '';
+  let blogImage = '';
   if (req.file == undefined) {
 
   } else {
@@ -39,6 +39,7 @@ router.post("/addblogpost", upload.single("blogImage"), (req, res) => {
     blogKeywords,
     blogTags,
     blogStatus,
+    blogSlug
   } = req.body;
 
   conn.query(
@@ -53,6 +54,7 @@ router.post("/addblogpost", upload.single("blogImage"), (req, res) => {
       blog_category: blogCategory,
       blog_keywords: blogKeywords,
       blog_tags: blogTags,
+      blog_slug: blogSlug,
       blog_status: blogStatus,
     },
     (err, result) => {
@@ -245,6 +247,32 @@ router.patch("/editblogpost/:id", upload.single("blogImage"), (req, res) => {
 
 });
 
+
+
+// check slug
+router.get("/checkSlugAvailability/:slug", async (req, res) => {
+  try {
+    const slug = req.params.slug;
+    const q = "SELECT COUNT(*) as count FROM bg_blog_post WHERE blog_slug = ?";
+    const values = [
+      slug
+    ]
+    conn.query(q, values, (err, data) => {
+      if (err) {
+        console.log(err);
+      } else {
+        const count = data[0].count;
+        res.json({ isAvailable: count != 0 });
+      }
+    });
+
+
+  } catch (error) {
+    // Handle any errors
+    console.error("Error checking slug availability:", error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
 
 
 
