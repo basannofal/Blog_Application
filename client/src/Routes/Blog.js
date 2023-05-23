@@ -5,8 +5,6 @@ import AddBlogPost from '../Pages/Blog/AddBlogPost';
 import AllBlogPost from '../Pages/Blog/AllBlogPost';
 import AllTrashBlogPost from '../Pages/Blog/AllTrashBlogPost'
 import EditBlogPost from '../Pages/Blog/EditBlogPost';
-import AllDraftBlogPost from '../Pages/Blog/AllDraftBlogPost';
-import AllPublishedBlogPost from '../Pages/Blog/AllPublishedBlogPost';
 
 function App() {
     return (
@@ -29,15 +27,6 @@ function App() {
 
             <Routes>
                 <Route path="/editblogpost" element={<EditBlogPost />}></Route>
-            </Routes>
-
-
-            <Routes>
-                <Route path="/alldraftblogpost" element={<AllDraftBlogPost />}></Route>
-            </Routes>
-
-            <Routes>
-                <Route path="/allpublishedblogpost" element={<AllPublishedBlogPost />}></Route>
             </Routes>
 
 

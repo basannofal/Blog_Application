@@ -34,6 +34,26 @@ const AllBlogPost = () => {
     }
   }
 
+
+
+  const getDraftPost = async () => {
+    try {
+      const res = await axios.get('/getdraftblogpost');
+      setBlogPost(res.data)
+    } catch (err) {
+      console.log(err);
+    }
+  }
+
+  const getPublishedPost = async () => {
+    try {
+      const res = await axios.get('/getpublishedblogpost');
+      setBlogPost(res.data)
+    } catch (err) {
+      console.log(err);
+    }
+  }
+
   const getData = async () => {
     try {
       const res = await axios.get(`/getblogcategory`);
@@ -154,11 +174,11 @@ const AllBlogPost = () => {
 
                 
                     <div className="d-flex" style={{ fontSize: "14px" }}>
-                      <NavLink to={'/allblogpost'} className='text-decoration-none text-dark'><p>All ({df + pb})</p></NavLink>
+                      <NavLink className='text-decoration-none text-dark' onClick={getPosts}><p>All ({df + pb})</p></NavLink>
                       <p className="mx-2">|</p>
-                      <NavLink to={'/allpublishedblogpost'} className='text-decoration-none text-dark'><p>Published ({pb})</p></NavLink>
+                      <NavLink className='text-decoration-none text-dark'  onClick={getPublishedPost}><p>Published ({pb})</p></NavLink>
                       <p className="mx-2">|</p>
-                      <NavLink to={'/alldraftblogpost'} className='text-decoration-none text-dark'><p>Draft ({df})</p></NavLink>
+                      <NavLink className='text-decoration-none text-dark' onClick={getDraftPost}><p>Draft ({df})</p></NavLink>
                       <p className="mx-2">|</p>
                       <NavLink to={'/alltrashblogpost'} className='text-decoration-none'><p className="text-danger">Trash</p></NavLink>
                     </div>
