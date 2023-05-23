@@ -212,11 +212,12 @@ router.patch("/editblogpost/:id", upload.single("blogImage"), (req, res) => {
     blogKeywords,
     blogTags,
     blogStatus,
+    blogSlug
   } = req.body;
 
 
 
-  const q = "UPDATE `bg_blog_post` SET `blog_title`= ?, `blog_description`= ?, `blog_content`= ?, `blog_author`= ?, `blog_publish_date`= ?, `blog_image`= ?, `blog_category`= ?, `blog_status`= ?, `blog_keywords`= ?, `blog_tags`= ? WHERE id = ?";
+  const q = "UPDATE `bg_blog_post` SET `blog_title`= ?, `blog_description`= ?, `blog_content`= ?, `blog_author`= ?, `blog_publish_date`= ?, `blog_image`= ?, `blog_category`= ?, `blog_status`= ?, `blog_keywords`= ?, `blog_tags`= ?, blog_slug = ?  WHERE id = ?";
 
 
   const id = req.params.id;
@@ -231,6 +232,7 @@ router.patch("/editblogpost/:id", upload.single("blogImage"), (req, res) => {
     blogStatus,
     blogKeywords,
     blogTags,
+    blogSlug,
     id
   ]
 
@@ -249,7 +251,7 @@ router.patch("/editblogpost/:id", upload.single("blogImage"), (req, res) => {
 
 
 
-// check slug
+// check slug for insert
 router.get("/checkSlugAvailability/:slug", async (req, res) => {
   try {
     const slug = req.params.slug;
@@ -275,5 +277,73 @@ router.get("/checkSlugAvailability/:slug", async (req, res) => {
 });
 
 
+
+// check slug for update
+router.get("/checkSlugAvailability/:slug/:id", async (req, res) => {
+  try {
+    const slug = req.params.slug;
+    const id =req.params.id;
+    const q = "SELECT COUNT(*) as count FROM bg_blog_post WHERE blog_slug = ? AND id != ?";
+    const values = [
+      slug,
+      id
+    ]
+    conn.query(q, values, (err, data) => {
+      if (err) {
+        console.log(err);
+        res.status(500).json({ error: "Internal server error" });
+      } else {
+        const count = data[0].count;
+        res.json({ isAvailable: count != 0 });
+      }
+    });
+
+
+  } catch (error) {
+    // Handle any errors
+    console.error("Error checking slug availability:", error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+// / **** Get Draft Blog Post ********
+
+router.get("/getdraftblogpost", (req, res) => {
+  console.log("** Reached ***");
+
+  const q =
+    "SELECT *, DATE_FORMAT(DATE(blog_publish_date), '%d-%m-%Y') AS blog_publish_date FROM bg_blog_post where  blog_status = ? and blog_delete_status = ? order by id desc ";
+
+    const flag = false;
+    const remove = true;
+
+  conn.query(q, [flag, remove], (err, data) => {
+    if (err) {
+      console.log(err);
+    } else {
+      res.send(data);
+    }
+  });
+});
+
+// **** Get Published Blog Post ********
+
+router.get("/getpublishedblogpost", (req, res) => {
+  console.log("** Reached ***");
+
+  const q =
+    "SELECT *, DATE_FORMAT(DATE(blog_publish_date), '%d-%m-%Y') AS blog_publish_date FROM bg_blog_post where  blog_status = ? and blog_delete_status = ? order by id desc ";
+
+    const flag = true;
+    const remove = true;
+
+  conn.query(q, [flag, remove], (err, data) => {
+    if (err) {
+      console.log(err);
+    } else {
+      res.send(data);
+    }
+  });
+});
 
 module.exports = router;

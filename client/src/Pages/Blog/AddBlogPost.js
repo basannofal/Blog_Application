@@ -7,6 +7,12 @@ import { Editor } from 'react-draft-wysiwyg';
 import 'react-draft-wysiwyg/dist/react-draft-wysiwyg.css';
 import { convertToHTML } from 'draft-convert';
 import slugify from 'slugify';
+import Button from '@mui/material/Button';
+import Dialog from '@mui/material/Dialog';
+import DialogActions from '@mui/material/DialogActions';
+import DialogContent from '@mui/material/DialogContent';
+import DialogContentText from '@mui/material/DialogContentText';
+import DialogTitle from '@mui/material/DialogTitle';
 
 
 const AddBlogPost = () => {
@@ -172,17 +178,17 @@ const AddBlogPost = () => {
 
     const incrementSlug = (slug) => {
         const lastChar = slug[slug.length - 1];
-        
+
         if (!isNaN(lastChar)) {
-          // Last character is a number, increment it by 1
-          const newLastChar = parseInt(lastChar, 10) + 1;
-          setBlogSlug(slug.slice(0, -1) + newLastChar);
+            // Last character is a number, increment it by 1
+            const newLastChar = parseInt(lastChar, 10) + 1;
+            setBlogSlug(slug.slice(0, -1) + newLastChar);
         } else {
-          // Last character is an alphabet, append '1' to the slug
-          setBlogSlug(slug + '1');
+            // Last character is an alphabet, append '1' to the slug
+            setBlogSlug(slug + '1');
         }
-      };
-      
+    };
+
 
 
     useEffect(() => {
@@ -230,6 +236,58 @@ const AddBlogPost = () => {
 
 
 
+    const [open, setOpen] = React.useState(false);
+    const [scroll, setScroll] = React.useState('paper');
+
+    const handleClickOpen = (scrollType) => () => {
+        setOpen(true);
+        setScroll(scrollType);
+    };
+
+    const handleClose = () => {
+        setOpen(false);
+    };
+
+    const descriptionElementRef = React.useRef(null);
+    React.useEffect(() => {
+        if (open) {
+            const { current: descriptionElement } = descriptionElementRef;
+            if (descriptionElement !== null) {
+                descriptionElement.focus();
+            }
+        }
+    }, [open]);
+
+    const [categoryName, setCategoryName] = useState("");
+    const [categoryDesc, setCategoryDesc] = useState("");
+    const [subCategory, setSubCategory] = useState(null);
+    const saveblogcategory = async (e) => {
+        e.preventDefault();
+        const team = {
+            categoryName: categoryName,
+            categoryDesc: categoryDesc,
+            subCategory: subCategory,
+        };
+        console.log(team);
+        try {
+            await axios
+                .post("/addblogcategory", team)
+                .then((res) => {
+                    console.log(res);
+                    window.alert("Blog Category Added Successfully");
+                    setOpen(false);
+                    setCategoryName('')
+                    setCategoryDesc('')
+                    setSubCategory('')
+                    getData()
+                })
+                .catch((e) => {
+                    console.log(e);
+                });
+        } catch (error) {
+            console.log(error);
+        }
+    };
 
     return (
         <>
@@ -381,9 +439,10 @@ const AddBlogPost = () => {
                                                             <label for="name">Blog Image</label>
                                                         </div>
 
-                                                        <div className="group">
+                                                        <div className="group ">
                                                             <label for="exampleInputEmail1">Select Blog Category</label>
                                                             <select
+                                                                className="mb-0"
                                                                 name="blog_category"
                                                                 placeholder=""
                                                                 id="blog_category"
@@ -401,8 +460,87 @@ const AddBlogPost = () => {
                                                                     );
                                                                 })}
                                                             </select>
+                                                            <NavLink onClick={handleClickOpen('paper')}><div className="mb-4" style={{ fontSize: 14 }}> Add New Category</div></NavLink>
                                                         </div>
+                                                        <Dialog
+                                                            open={open}
+                                                            fullWidth={true}
+                                                            onClose={handleClose}
+                                                            scroll={scroll}
+                                                            aria-labelledby="scroll-dialog-title"
+                                                            aria-describedby="scroll-dialog-description"
+                                                        >
+                                                            <DialogTitle id="scroll-dialog-title">Add New Category</DialogTitle>
+                                                            <DialogContent dividers={scroll === 'paper'}>
+                                                                <DialogContentText
+                                                                    id="scroll-dialog-description"
+                                                                    ref={descriptionElementRef}
+                                                                    tabIndex={-1}
+                                                                >
+                                                                    <div class="dash-content px-3" >
+                                                                        <div class="card rounded-0">
+                                   
+                                                                            <form class="form" >
+                                                                                <div class="group">
+                                                                                    <input
+                                                                                        placeholder=""
+                                                                                        type="text"
+                                                                                        value={categoryName}
+                                                                                        onChange={(e) => {
+                                                                                            setCategoryName(e.target.value);
+                                                                                        }}
+                                                                                        required
+                                                                                    />
+                                                                                    <label for="name">Blog Category Name</label>
+                                                                                </div>
 
+                                                                                <div className="group">
+                                                                                    <label for="exampleInputEmail1">Blog Sub Category</label>
+                                                                                    <select
+                                                                                        name="blog_subcategory"
+                                                                                        placeholder=""
+                                                                                        id="blog_subcategory"
+                                                                                        value={subCategory}
+                                                                                        onChange={(e) => {
+                                                                                            setSubCategory(e.target.value);
+                                                                                        }}
+                                                                                        required
+                                                                                    >
+                                                                                        <option value="Null">Null</option>
+                                                                                        {category.map((e) => {
+                                                                                            return (
+                                                                                                <>
+                                                                                                    <option value={e.id}>{e.category_name}</option>
+                                                                                                </>
+                                                                                            );
+                                                                                        })}
+                                                                                    </select>
+                                                                                </div>
+
+                                                                                <div class="group">
+                                                                                    <input
+                                                                                        placeholder=""
+                                                                                        type="text"
+                                                                                        value={categoryDesc}
+                                                                                        onChange={(e) => {
+                                                                                            setCategoryDesc(e.target.value);
+                                                                                        }}
+                                                                                        required
+                                                                                    />
+                                                                                    <label for="name">Category Description</label>
+                                                                                </div>
+
+
+                                                                            </form>
+                                                                        </div>
+                                                                    </div>
+                                                                </DialogContentText>
+                                                            </DialogContent>
+                                                            <DialogActions>
+                                                                <Button variant="outlined" onClick={handleClose}>Cancel</Button>
+                                                                <Button variant="contained" onClick={saveblogcategory}>Submit</Button>
+                                                            </DialogActions>
+                                                        </Dialog>
                                                         <div class="group">
                                                             <input
                                                                 type="text"

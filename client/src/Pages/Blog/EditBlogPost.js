@@ -7,6 +7,8 @@ import { Editor } from 'react-draft-wysiwyg';
 import 'react-draft-wysiwyg/dist/react-draft-wysiwyg.css';
 import { convertToHTML } from 'draft-convert';
 import htmlToDraft from 'html-to-draftjs';
+import slugify from 'slugify';
+
 
 
 const EditBlogPost = () => {
@@ -27,6 +29,7 @@ const EditBlogPost = () => {
     const [blogCategory, setBlogCategory] = useState("");
     const [blogKeywords, setBlogKeywords] = useState([]);
     const [blogTags, setBlogTags] = useState("");
+    const [blogSlug, setBlogSlug] = useState('');
 
 
     // Store the Category Data in this State
@@ -84,6 +87,7 @@ const EditBlogPost = () => {
             const str = res.data[0].blog_keywords;
             setBlogKeywords(str.split(","))
             setBlogTags(res.data[0].blog_tags)
+            setBlogSlug(res.data[0].blog_slug)
             console.log(res.data[0])
 
         } catch (error) {
@@ -157,6 +161,7 @@ const EditBlogPost = () => {
             formdata.append("blogCategory", blogCategory);
             formdata.append("blogKeywords", blogKeywords);
             formdata.append("blogTags", blogTags);
+            formdata.append("blogSlug", blogSlug);
             formdata.append("blogStatus", blogStatus);
 
             const res = axios.patch(`/editblogpost/${location.state.id}`, formdata);
@@ -171,6 +176,61 @@ const EditBlogPost = () => {
             console.log(e);
         }
     };
+
+
+    
+
+
+    const generateSlug = (blogTitle) => {
+        const options = {
+            replacement: '-',  // Replace spaces with -
+            remove: /[*+~.()'"!:@]/g,  // Remove special characters
+            lower: true  // Convert to lowercase
+        };
+        const newSlug = slugify(blogTitle, options);
+        setBlogSlug(newSlug);
+    };
+
+
+    const checkSlugAvailability = async (slug) => {
+        try {
+            const response = await axios.get(`/checkSlugAvailability/${slug}/${location.state.id}`);
+            const { isAvailable } = response.data;
+
+            // Handle the response accordingly
+            if (isAvailable) {
+                // Slug is available
+                incrementSlug(blogSlug)
+                console.log("Slug is available");
+            } else {
+                // Slug is not available
+                console.log("Slug is same as original");
+            }
+        } catch (error) {
+            // Handle any errors
+            console.error("Error checking slug availability:", error);
+        }
+    };
+
+    const incrementSlug = (slug) => {
+        const lastChar = slug[slug.length - 1];
+        
+        if (!isNaN(lastChar)) {
+          // Last character is a number, increment it by 1
+          const newLastChar = parseInt(lastChar, 10) + 1;
+          setBlogSlug(slug.slice(0, -1) + newLastChar);
+        } else {
+          // Last character is an alphabet, append '1' to the slug
+          setBlogSlug(slug + '1');
+        }
+      };
+      
+
+
+    useEffect(() => {
+        checkSlugAvailability(blogSlug);
+    }, [blogSlug]);
+
 
     return (
         <>
@@ -373,6 +433,23 @@ const EditBlogPost = () => {
                                                             />
                                                             <label for="name">Blog Tags</label>
                                                         </div>
+
+
+                                                        
+                                                        <div class="group mt-3">
+                                                            <input
+                                                                placeholder=""
+                                                                type="text"
+                                                                value={blogSlug}
+                                                                onChange={(e) => {
+                                                                    setBlogSlug(e.target.value);
+                                                                    generateSlug(e.target.value)
+                                                                }}
+                                                                required
+                                                            />
+                                                            <label for="name">Blog Slug</label>
+                                                        </div>
+
 
                                                         <div className="row">
                                                             <button className="col-lg-5 ml-2" type="submit" onClick={(e) => savedata(e, 1)}>Publish</button>

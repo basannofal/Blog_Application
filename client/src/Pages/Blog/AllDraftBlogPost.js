@@ -1,34 +1,21 @@
 import axios from "axios";
 import React, { useEffect, useState } from "react";
-import { Link, NavLink } from "react-router-dom";
+import { NavLink } from "react-router-dom";
 import Sidebars from "../../Layout/Sidebars";
 
-const AllBlogPost = () => {
-
+const AllDraftBlogPost = () => {
   const [blogCategory, setBlogCategory] = useState([]);
   const [blogPost, setBlogPost] = useState([]);
   const [searchFilter, setSearchFilter] = useState("");
   const [currentPage, setCurrentPage] = useState(0);
-  const [pb, setPb] = useState(0)
   const [df, setDf] = useState(0)
-  let published = 0;
-  let draft = 0;
 
   const getPosts = async () => {
     try {
-      const res = await axios.get('/getblogposts');
+      const res = await axios.get('/getdraftblogpost');
       setBlogPost(res.data)
-      console.log(res.data);
 
-      res.data.map((e, idx) => {
-        if (e.blog_status) {
-          published = published + 1;
-        } else {
-          draft = draft + 1;
-        }
-      })
-      setPb(published)
-      setDf(draft)
+      setDf(res.data.length);
     } catch (err) {
       console.log(err);
     }
@@ -50,15 +37,6 @@ const AllBlogPost = () => {
     getData();
   }, []);
 
-  const trashBlogPost = async (id) => {
-    try {
-      const res = await axios.patch(`/trashblogpost/${id}`);
-      getPosts();
-    } catch (error) {
-      window.alert(error);
-    }
-  };
-
   const itemPerPage = 10;
 
   const numberOfPage = Math.ceil(blogPost.length / itemPerPage);
@@ -72,6 +50,7 @@ const AllBlogPost = () => {
     currentPage * itemPerPage,
     (currentPage + 1) * itemPerPage
   );
+
 
   return (
     <>
@@ -150,20 +129,15 @@ const AllBlogPost = () => {
 
                   <div class="activity">
 
-                    <p class="mb-3" style={{ fontSize: 20, fontWeight: "bold" }}>All Blog Post </p>
+                    <p class="mb-3" style={{ fontSize: 20, fontWeight: "bold" }}>All Draft Blog Post </p>
 
-                
                     <div className="d-flex" style={{ fontSize: "14px" }}>
-                      <NavLink to={'/allblogpost'} className='text-decoration-none text-dark'><p>All ({df + pb})</p></NavLink>
+                      <NavLink to={'/allblogpost'} className='text-decoration-none'><p className="text-primary"> <i class="bi bi-arrow-left"></i> &nbsp; Back</p></NavLink>
                       <p className="mx-2">|</p>
-                      <NavLink to={'/allpublishedblogpost'} className='text-decoration-none text-dark'><p>Published ({pb})</p></NavLink>
-                      <p className="mx-2">|</p>
-                      <NavLink to={'/alldraftblogpost'} className='text-decoration-none text-dark'><p>Draft ({df})</p></NavLink>
-                      <p className="mx-2">|</p>
-                      <NavLink to={'/alltrashblogpost'} className='text-decoration-none'><p className="text-danger">Trash</p></NavLink>
-                    </div>
+                      <p className="text-dark" >Draft ({df})</p>
 
-                
+
+                    </div>
                     <table class="table table-striped" style={{ border: "1px solid #C3C4C7", backgroundColor: "#fff" }}>
                       <thead>
                         <tr>
@@ -191,13 +165,6 @@ const AllBlogPost = () => {
                                   <tr className="blog-title">
                                     <td style={{ width: "33%" }}>
                                       {e.blog_title}
-                                      <p className="p-0 m-0 tred " style={{ fontSize: '14px' }}>
-                                        <div className="d-flex">
-
-                                          <Link to={`/editblogpost`} state={{ id: e.id, content: e.blog_content }} className='text-decoration-none'><p className="p-0 m-0">Edit | </p></Link>
-                                          <p className="text-danger p-0 m-0" onClick={() => { trashBlogPost(e.id) }}>&nbsp;Trash</p>
-                                        </div>
-                                      </p>
                                     </td>
                                     <td>{e.blog_author}</td>
                                     <td>
@@ -280,4 +247,4 @@ const AllBlogPost = () => {
   );
 };
 
-export default AllBlogPost;
+export default AllDraftBlogPost;

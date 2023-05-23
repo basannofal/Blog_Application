@@ -1,3 +1,4 @@
+
 .card {
     background-color: #fff;
     border-radius: 10px;
@@ -135,7 +136,7 @@ input {
 /* CSS Tab in MemberDetail **/
 @import url('https://fonts.googleapis.com/css?family=Arimo:400,700&display=swap');
 body{
-  background:#CDDC39;
+  background:#fff;
   font-family: 'Arimo', sans-serif;
 }
 h2{
