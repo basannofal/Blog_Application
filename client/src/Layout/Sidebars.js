@@ -1,13 +1,20 @@
-import React, { useState } from 'react'
-import { NavLink } from 'react-router-dom';
+import React, { useEffect, useState } from 'react'
+import { NavLink, useLocation } from 'react-router-dom';
 
 
 export const Sidebars = () => {
+    const location = useLocation();
     const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+    const [isNameDropDown, setIsNameDropDown] = useState(false);
 
     const toggleDropdown = () => {
         setIsDropdownOpen(!isDropdownOpen);
     };
+
+    const NametoggleDropdown = () => {
+        setIsNameDropDown(!isNameDropDown);
+    };
+    
     return (
         <>
             <nav class="sidebar sidebar-offcanvas" id="sidebar">
@@ -24,7 +31,7 @@ export const Sidebars = () => {
                     </li>
 
                     <li className="nav-item">
-                        <a
+                        <NavLink to={`/allblogpost`}
                             className="nav-link"
                             data-bs-toggle="collapse"
                             aria-expanded={isDropdownOpen ? 'true' : 'false'}
@@ -36,7 +43,7 @@ export const Sidebars = () => {
                             </span>
                             <span className="menu-title">Blogs</span>
                             <i className={`bi bi-arrow-${isDropdownOpen ? 'up' : 'down'}-short menu-arrow`}></i>
-                        </a>
+                        </NavLink>
                     </li>
                     {isDropdownOpen && (
                         <li className="nav-item ">
@@ -59,14 +66,58 @@ export const Sidebars = () => {
                         </li>
                     )}
 
+
+
                     <li class="nav-item">
-                        <a class="nav-link" href="pages/icons/mdi.html">
+                        <NavLink to={'/addblogcategory'} className='text-decoration-none '><p className="nav-link my-0">
                             <span class="icon-bg">
-                                <i className='uil uil-estate  menu-icon'></i>
+                                <i className='bi bi-chat-right-text menu-icon'></i>
                             </span>
-                            <span class="menu-title">Icons</span>
-                        </a>
+                            <span class="menu-title">Comments</span>
+                        </p>
+                        </NavLink>
                     </li>
+
+
+                    <li className="nav-item">
+                        <NavLink
+                            className="nav-link"
+                            data-bs-toggle="collapse"
+                            aria-expanded={isNameDropDown ? 'true' : 'false'}
+                            aria-controls="ui-basic"
+                            onClick={NametoggleDropdown}
+                        >
+                            <span className="icon-bg">
+                                <i className="mdi mdi-format-list-bulleted menu-icon"></i>
+                            </span>
+                            <span className="menu-title">Name</span>
+                            <i className={`bi bi-arrow-${isNameDropDown ? 'up' : 'down'}-short menu-arrow`}></i>
+                        </NavLink>
+                    </li>
+                    {isNameDropDown && (
+                        <li className="nav-item ">
+                            <NavLink to={'/allnames'} className='text-decoration-none '><p className="nav-link m-0 p-1">
+                                <i class="bi bi-arrow-right-short"></i> <span style={{ paddingLeft: '20px' }}> All Names </span>
+                            </p></NavLink>
+                        </li>
+                    )}
+                    {isNameDropDown && (
+                        <li className="nav-item">
+                            <NavLink to={'/addnames'} className='text-decoration-none '><p className="nav-link m-0 p-1">
+                                <i class="bi bi-arrow-right-short"></i> <span style={{ paddingLeft: '20px' }}> Add New </span>
+                            </p></NavLink>
+                        </li>
+                    )}
+                    {isNameDropDown && (
+                        <li className="nav-item">
+                            <NavLink to={'/addnamecategory'} className='text-decoration-none'><p className="nav-link m-0 p-1"><i class="bi bi-arrow-right-short"></i> <span style={{ paddingLeft: '20px' }}> Category </span>
+                            </p></NavLink>
+                        </li>
+                    )}
+
+
+
+
                     <li class="nav-item">
                         <a class="nav-link" href="pages/forms/basic_elements.html">
                             <span class="icon-bg"><i class="mdi mdi-format-list-bulleted menu-icon"></i></span>

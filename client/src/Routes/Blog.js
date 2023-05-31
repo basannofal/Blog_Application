@@ -5,8 +5,9 @@ import AddBlogPost from '../Pages/Blog/AddBlogPost';
 import AllBlogPost from '../Pages/Blog/AllBlogPost';
 import AllTrashBlogPost from '../Pages/Blog/AllTrashBlogPost'
 import EditBlogPost from '../Pages/Blog/EditBlogPost';
+import PreviewPost from '../Pages/Blog/PreviewPost';
 
-function App() {
+function Blog() {
     return (
         <>
             <Routes>
@@ -29,8 +30,12 @@ function App() {
                 <Route path="/editblogpost" element={<EditBlogPost />}></Route>
             </Routes>
 
+            <Routes>
+                <Route path="/preview/:slug" element={<PreviewPost />}></Route>
+            </Routes>
+
 
         </>
     );
 }
-export default App;
+export default Blog;

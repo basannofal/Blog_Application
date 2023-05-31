@@ -7,6 +7,8 @@ const cors = require('cors')
 // blog category routes
 const blogCategory_route = require('./Routes/Blog/BlogCategory');
 const dashboard_routes = require('./Routes/Dashboard/Dashboard');
+const namescategory_routes = require('./Routes/Names/Namescategory');
+const names_routes = require('./Routes/Names/Names');
 // const blogPost_route = require('./Routes/Blog/BlogPost');
 
 // Middlewares
@@ -21,6 +23,12 @@ app.use('/', blogCategory_route);
 
 // dashboard routes
 app.use('/', dashboard_routes)
+
+// Names categoty routes
+app.use('/', namescategory_routes)
+
+// Names routes
+app.use('/', names_routes)
 
 // app.use('/', blogPost_route);
 

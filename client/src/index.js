@@ -5,10 +5,12 @@ import './Assets/css/App.css'
 import './Assets/css/Sidebar.css'
 import App from './Routes/App';
 import Blog from './Routes/Blog';
+import Names from './Routes/Names';
 
 ReactDOM.render(
   <BrowserRouter>
     <App />
     <Blog />
+    <Names />
   </BrowserRouter>,
   document.getElementById("root"))

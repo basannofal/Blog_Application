@@ -3,62 +3,30 @@ import React, { useEffect, useState } from "react";
 import { Link, NavLink } from "react-router-dom";
 import Sidebars from "../../Layout/Sidebars";
 
-const AllBlogPost = () => {
-
+const AllNames = () => {
   const [categoryFilter, setCategoryFilter] = useState("");
-  const [blogCategory, setBlogCategory] = useState([]);
-  const [blogPost, setBlogPost] = useState([]);
+  const [NameCategory, setNameCategory] = useState([]);
+  const [names, setNames] = useState([]);
   const [searchFilter, setSearchFilter] = useState("");
   const [currentPage, setCurrentPage] = useState(0);
-  const [pb, setPb] = useState(0)
-  const [df, setDf] = useState(0)
-  let published = 0;
-  let draft = 0;
+  const [totalNames, setTotalNames] = useState(0);
 
-  const getPosts = async () => {
+
+  const getNames = async () => {
     try {
-      const res = await axios.get('/getblogposts');
-      setBlogPost(res.data)
-      console.log(res.data);
-
-      res.data.map((e, idx) => {
-        if (e.blog_status) {
-          published = published + 1;
-        } else {
-          draft = draft + 1;
-        }
-      })
-      setPb(published)
-      setDf(draft)
+      const res = await axios.get('/getnames');
+      setNames(res.data)
+      setTotalNames(res.data.length);
     } catch (err) {
       console.log(err);
     }
   }
 
-
-
-  const getDraftPost = async () => {
-    try {
-      const res = await axios.get('/getdraftblogpost');
-      setBlogPost(res.data)
-    } catch (err) {
-      console.log(err);
-    }
-  }
-
-  const getPublishedPost = async () => {
-    try {
-      const res = await axios.get('/getpublishedblogpost');
-      setBlogPost(res.data)
-    } catch (err) {
-      console.log(err);
-    }
-  }
 
   const getData = async () => {
     try {
-      const res = await axios.get(`/getblogcategory`);
-      setBlogCategory(res.data);
+      const res = await axios.get(`/getnamescategory`);
+      setNameCategory(res.data);
       console.log(res.data);
     } catch (error) {
       console.log(error);
@@ -67,51 +35,51 @@ const AllBlogPost = () => {
 
 
   useEffect(() => {
-    getPosts();
+    getNames();
     getData();
   }, []);
 
-  const trashBlogPost = async (id) => {
+  const trashNames = async (id) => {
     try {
-      const res = await axios.patch(`/trashblogpost/${id}`);
-      getPosts();
+      const res = await axios.patch(`/trashnames/${id}`);
+      getNames();
     } catch (error) {
       window.alert(error);
     }
   };
 
-  const [filteredBlogPost, setFilteredBlogPost] = useState(blogPost);
+  const [filterNames, setfilterNames] = useState(names);
   const filterBlogPosts = () => {
     const searchTerm = searchFilter.toLowerCase();
-    const filteredPosts = blogPost.filter((item) => {
-      const titleMatches = item.blog_title.toLowerCase().includes(searchTerm);
-      const authorMatches = item.blog_author.toLowerCase().startsWith(searchTerm);
-      const tagsMatches = item.blog_tags.toLowerCase().startsWith(searchTerm);
-      const publishDateMatches = item.blog_publish_date.toLowerCase().startsWith(searchTerm);
-  
+    const filterednames = names.filter((item) => {
+      const name1 = item.name_lang1.toLowerCase().includes(searchTerm);
+      const name2 = item.name_lang2.toLowerCase().startsWith(searchTerm);
+      const nameMeaning = item.name_meaning.toLowerCase().startsWith(searchTerm);
+      const nameGender = item.name_gender.toLowerCase().startsWith(searchTerm);
+
       // Apply category filter
-      const categoryMatches = categoryFilter === "" || item.blog_category == categoryFilter;
-  
-      return (titleMatches || authorMatches || tagsMatches || publishDateMatches) && categoryMatches;
+      const categoryMatches = categoryFilter === "" || item.name_category == categoryFilter;
+
+      return (name1 || name2 || nameMeaning || nameGender) && categoryMatches;
     });
-    setFilteredBlogPost(filteredPosts);
+    setfilterNames(filterednames);
   };
 
   useEffect(() => {
     filterBlogPosts();
-  }, [searchFilter, categoryFilter, blogPost]);
-  
+  }, [searchFilter, categoryFilter, names]);
+
 
   const itemPerPage = 10;
 
-  const numberOfPage = Math.ceil(filteredBlogPost.length / itemPerPage);
+  const numberOfPage = Math.ceil(filterNames.length / itemPerPage);
   const pageIndex = Array.from({ length: numberOfPage }, (_, idx) => idx + 1);
 
   const handlePageChange = (pageNumber) => {
     setCurrentPage(pageNumber);
   };
 
-  const rows = filteredBlogPost.slice(
+  const rows = filterNames.slice(
     currentPage * itemPerPage,
     (currentPage + 1) * itemPerPage
   );
@@ -171,7 +139,7 @@ const AllBlogPost = () => {
                       style={{ display: "flex", justifyContent: "right" }}
                     >
                       <NavLink
-                        to={`/addblogpost`}
+                        to={`/addnames`}
                         style={{ textDecoration: "none" }}
                       >
                         <button
@@ -185,7 +153,7 @@ const AllBlogPost = () => {
                             class="uil uil-plus mr-2"
                             style={{ backgroundColor: "#007bff" }}
                           ></i>
-                          New Post
+                          New Name
                         </button>
                       </NavLink>
                     </div>
@@ -193,18 +161,14 @@ const AllBlogPost = () => {
 
                   <div class="activity">
 
-                    <p class="mb-3" style={{ fontSize: 20, fontWeight: "bold" }}>All Blog Post </p>
+                    <p class="mb-3" style={{ fontSize: 20, fontWeight: "bold" }}>All Names </p>
 
                     <div className="d-flex" style={{ justifyContent: "space-between", alignItems: "center" }}>
 
                       <div className="d-flex" style={{ fontSize: "14px" }}>
-                        <NavLink className='text-decoration-none text-dark' onClick={getPosts}><p>All ({df + pb})</p></NavLink>
+                        <NavLink className='text-decoration-none text-dark' onClick={getNames}><p>All ({totalNames})</p></NavLink>
                         <p className="mx-2">|</p>
-                        <NavLink className='text-decoration-none text-dark' onClick={getPublishedPost}><p>Published ({pb})</p></NavLink>
-                        <p className="mx-2">|</p>
-                        <NavLink className='text-decoration-none text-dark' onClick={getDraftPost}><p>Draft ({df})</p></NavLink>
-                        <p className="mx-2">|</p>
-                        <NavLink to={'/alltrashblogpost'} className='text-decoration-none'><p className="text-danger">Trash</p></NavLink>
+                        <NavLink to={'/alltrashnames'} className='text-decoration-none'><p className="text-danger">Trash</p></NavLink>
                       </div>
 
                       <div class="group">
@@ -223,7 +187,7 @@ const AllBlogPost = () => {
                           }}
                         >
                           <option value=''>All categories</option>
-                          {blogCategory.map((category) => (
+                          {NameCategory.map((category) => (
                             <option key={category.id} value={category.id}>
                               {category.category_name}
                             </option>
@@ -236,12 +200,14 @@ const AllBlogPost = () => {
                     <table class="table table-striped" style={{ border: "1px solid #C3C4C7", backgroundColor: "#fff" }}>
                       <thead>
                         <tr>
-                          <th scope="col">Image</th>
-                          <th scope="col">Blog Title</th>
-                          <th scope="col">Blog Author</th>
-                          <th scope="col">Blog Category</th>
-                          <th scope="col">Blog Tags</th>
-                          <th scope="col">Blog Publish Date</th>
+                          <th scope="col">Name</th>
+                          <th scope="col">Name</th>
+                          <th scope="col">Meaning</th>
+                          <th scope="col">Descripiton</th>
+                          <th scope="col">Gender</th>
+                          <th scope="col">Category</th>
+                          <th scope="col">Date & Time</th>
+                          <th scope="col">Priority</th>
                         </tr>
                       </thead>
                       <tbody style={{ fontSize: '15px' }}>
@@ -255,34 +221,36 @@ const AllBlogPost = () => {
                               return (
                                 <>
                                   <tr className="blog-title">
-                                    <td> <img src={(`./uploads/Blog/${e.blog_image}`)} style={{ height: "50px", width: "50px" }} /></td>
-                                    <td style={{ width: "33%" }}>
-                                      {e.blog_title}
+                                    <td style={{ width: "15%" }}>
+                                      {e.name_lang1}
                                       <p className="p-0 m-0 tred " style={{ fontSize: '14px' }}>
                                         <div className="d-flex">
-                                        <Link to={`/preview/${e.blog_slug}`} state={{ id: e.id, content: e.blog_content }} className='text-decoration-none'><p className="p-0 m-0 text-success ">View | </p></Link>
-                                          <Link to={`/editblogpost`} state={{ id: e.id, content: e.blog_content }} className='text-decoration-none'><p className="p-0 m-0">&nbsp;Edit | </p></Link>
-                                          <p className="text-danger p-0 m-0" onClick={() => { trashBlogPost(e.id) }}>&nbsp;Trash</p>
+                                          <Link to={`/editnames`} state={{ id: e.id, content: e.blog_content }} className='text-decoration-none'><p className="p-0 m-0">&nbsp;Edit | </p></Link>
+                                          <p className="text-danger p-0 m-0" onClick={() => { trashNames(e.id) }}>&nbsp;Trash</p>
                                         </div>
                                       </p>
                                     </td>
-                                    <td>{e.blog_author}</td>
+                                    <td> {e.name_lang2}</td>
+                                    <td>{e.name_meaning}</td>
+                                    <td>{e.name_description}</td>
+                                    <td>{e.name_gender}</td>
+
+
                                     <td>
-                                      {blogCategory.map((x) => {
-                                        if (e.blog_category === x.id) {
+                                      {NameCategory.map((x) => {
+                                        if (e.name_category === x.id) {
                                           flag = 1;
                                           return x.category_name;
                                         }
                                       })}
                                       {flag === 0 ? "null" : ""}
                                     </td>
-                                    <td>{e.blog_tags}</td>
                                     <td>
-                                      {
-                                        e.blog_status == 0 ? <p className="m-0 p-0">Draft</p> : <p className="m-0 p-0">Published</p>
-                                      }
-                                      {e.blog_publish_date} {e.blog_time}
+                                      <p className="m-0 p-0"> {e.upload_date}</p>
+                                      <p className="m-0 p-0"> {e.upload_time}</p>
+
                                     </td>
+                                    <td>{e.name_priority}</td>
 
                                   </tr >
                                 </>
@@ -345,6 +313,6 @@ const AllBlogPost = () => {
       </div >
     </>
   );
-};
+}
 
-export default AllBlogPost;
+export default AllNames

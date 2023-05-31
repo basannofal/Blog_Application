@@ -139,11 +139,7 @@ body{
   background:#fff;
   font-family: 'Arimo', sans-serif;
 }
-h2{
-  color:#000;
-  text-align:center;
-  font-size:2em;
-}
+
 .warpper{
   display:flex;
   flex-direction: column;

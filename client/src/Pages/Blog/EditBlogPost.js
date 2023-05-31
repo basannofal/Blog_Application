@@ -28,7 +28,7 @@ const EditBlogPost = () => {
     const [blogImage, setBlogImage] = useState("");
     const [blogCategory, setBlogCategory] = useState("");
     const [blogKeywords, setBlogKeywords] = useState([]);
-    const [blogTags, setBlogTags] = useState("");
+    const [blogTags, setBlogTags] = useState([]);
     const [blogSlug, setBlogSlug] = useState('');
 
 
@@ -61,6 +61,42 @@ const EditBlogPost = () => {
     }
 
 
+
+
+    
+        // Tags 
+
+    // Function to handle Enter key press
+    const handleTags = (event) => {
+        if (event.key === 'Enter' || event.key == ",") {
+            // Add the entered keyword to the keywords array
+            event.preventDefault();
+            setBlogTags([...blogTags, event.target.value]);
+            console.log(event.target.value);
+            console.log(blogTags);
+            // Clear the input field
+            event.target.value = '';
+        }
+
+    };
+
+    const RemoveTags = (idx) => {
+
+        const newArray = [...blogTags];
+        newArray.splice(idx, 1);
+        setBlogTags(newArray)
+    }
+
+
+
+
+
+
+
+
+
+
+
     // Get Category Data
     const getData = async () => {
         try {
@@ -86,7 +122,8 @@ const EditBlogPost = () => {
             setBlogImage(res.data[0].blog_image);
             const str = res.data[0].blog_keywords;
             setBlogKeywords(str.split(","))
-            setBlogTags(res.data[0].blog_tags)
+            const strtags = res.data[0].blog_tags;
+            setBlogTags(strtags.split(","))
             setBlogSlug(res.data[0].blog_slug)
             console.log(res.data[0])
 
@@ -138,7 +175,7 @@ const EditBlogPost = () => {
     useEffect(() => {
         const html = convertToHTML(options)(editorState.getCurrentContent());
         setConvertedContent(html);
-
+        console.log(location.state.content);
     }, [editorState]);
 
 
@@ -422,16 +459,23 @@ const EditBlogPost = () => {
                                                         </div>
 
                                                         <div class="group">
-                                                            <input
-                                                                placeholder=""
+                                                        <input
                                                                 type="text"
-                                                                value={blogTags}
-                                                                onChange={(e) => {
-                                                                    setBlogTags(e.target.value);
-                                                                }}
-                                                                required
+                                                                onKeyDown={handleTags}
                                                             />
                                                             <label for="name">Blog Tags</label>
+
+                                                            <div className="container">
+                                                                {blogTags.map((tags, index) => (
+
+                                                                    <div key={index} className=" row bg-light py-2 mb-2"  >
+                                                                        <div className="col-lg-10" >{tags}</div>
+                                                                        <div className="col-lg-2" >
+                                                                            <i class="bi bi-x-circle" onClick={() => { RemoveTags(index) }}></i>
+                                                                        </div>
+                                                                    </div>
+                                                                ))}
+                                                            </div>
                                                         </div>
 
 
