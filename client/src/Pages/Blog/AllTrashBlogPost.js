@@ -2,6 +2,8 @@ import axios from "axios";
 import React, { useEffect, useState } from "react";
 import { NavLink } from "react-router-dom";
 import Sidebars from "../../Layout/Sidebars";
+import { toast, ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 const AllTrashBlogPost = () => {
   const [blogCategory, setBlogCategory] = useState([]);
@@ -63,33 +65,46 @@ const AllTrashBlogPost = () => {
 
   const DeletePost = async (id) => {
     try {
-        const res = await axios.delete(`/deletepost/${id}`);
-        getPosts();
-      } catch (error) {
-        window.alert(error);
-      }
+      const res = await axios.delete(`/deletepost/${id}`);
+      toast.success("Post Delete Successfully");
+      getPosts();
+    } catch (error) {
+      window.alert(error);
+    }
   }
 
 
-  const DeleteAlert = async (id) =>{
+  const DeleteAlert = async (id) => {
     let title;
     try {
-        const res = await axios.get(`/getblogpostdetail/${id}`);
-        title = res.data[0].blog_title;
-      } catch (error) {
-        window.alert(error);
+      const res = await axios.get(`/getblogpostdetail/${id}`);
+      title = res.data[0].blog_title;
+    } catch (error) {
+      window.alert(error);
     }
-     let x =window.prompt(`Enter Title Name = ${title} `, '');
-     if(x==title){
-        DeletePost(id);
-     }else{
-        window.alert("Oops ! Title is Incorrect")
-     }
+    let x = window.prompt(`Enter Title Name = ${title} `, '');
+    if (x == title) {
+      DeletePost(id);
+    } else {
+      window.alert("Oops ! Title is Incorrect")
+    }
   }
 
   return (
     <>
       <div class="container-scroller">
+        <ToastContainer
+          position="top-right"
+          autoClose={5000}
+          hideProgressBar={false}
+          newestOnTop={false}
+          closeOnClick
+          rtl={false}
+          pauseOnFocusLoss
+          draggable
+          pauseOnHover
+          theme="dark"
+        />
         <nav class="navbar default-layout-navbar col-lg-12 col-12 p-0 fixed-top d-flex flex-row">
           <div class="text-center navbar-brand-wrapper d-flex align-items-center justify-content-center">
             <a class="navbar-brand brand-logo" href="">
@@ -166,14 +181,14 @@ const AllTrashBlogPost = () => {
 
                     <p class="mb-3" style={{ fontSize: 20, fontWeight: "bold" }}>All Trash Blog Post </p>
 
-                  <div className="d-flex" style={{fontSize:"14px"}}>
-                          <NavLink to={'/allblogpost'} className='text-decoration-none'><p className="text-primary"> <i class="bi bi-arrow-left"></i> &nbsp; Back</p></NavLink>
-                          <p className="mx-2">|</p>
-                          <p className="text-danger" >Trash ({pb})</p>
-                        
+                    <div className="d-flex" style={{ fontSize: "14px" }}>
+                      <NavLink to={'/allblogpost'} className='text-decoration-none'><p className="text-primary"> <i class="bi bi-arrow-left"></i> &nbsp; Back</p></NavLink>
+                      <p className="mx-2">|</p>
+                      <p className="text-danger" >Trash ({pb})</p>
 
-                  </div>
-                    <table class="table table-striped" style={{border:"1px solid #C3C4C7", backgroundColor:"#fff"}}>
+
+                    </div>
+                    <table class="table table-striped" style={{ border: "1px solid #C3C4C7", backgroundColor: "#fff" }}>
                       <thead>
                         <tr>
                           <th scope="col">Blog Title</th>
@@ -194,11 +209,11 @@ const AllTrashBlogPost = () => {
                             .map((e, idx) => {
                               let flag = 0;
 
-                                
-                                return (
-                                  <>
+
+                              return (
+                                <>
                                   <tr className="blog-title">
-                                    <td  style={{width:"33%"}}>
+                                    <td style={{ width: "33%" }}>
                                       {e.blog_title}
                                       <p className="p-0 m-0 tred " style={{ fontSize: '14px' }}>
                                         <div className="d-flex">

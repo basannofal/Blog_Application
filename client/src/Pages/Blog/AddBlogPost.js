@@ -2,7 +2,7 @@ import axios from "axios";
 import React, { useEffect, useState, useRef, useCallback } from "react";
 import { NavLink, useNavigate, useParams } from "react-router-dom";
 import Sidebars from "../../Layout/Sidebars";
-import { EditorState, convertToRaw, convertFromRaw } from 'draft-js';
+import { EditorState, convertToRaw, convertFromRaw, AtomicBlockUtils, Entity } from 'draft-js';
 import { Editor } from 'react-draft-wysiwyg';
 import 'react-draft-wysiwyg/dist/react-draft-wysiwyg.css';
 import { convertToHTML } from 'draft-convert';
@@ -13,6 +13,10 @@ import DialogActions from '@mui/material/DialogActions';
 import DialogContent from '@mui/material/DialogContent';
 import DialogContentText from '@mui/material/DialogContentText';
 import DialogTitle from '@mui/material/DialogTitle';
+import { toast, ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+import draftToHtml from 'draftjs-to-html';
+
 
 
 const AddBlogPost = () => {
@@ -57,31 +61,182 @@ const AddBlogPost = () => {
 
 
 
-    const blockToHTML = (block) => {
-        if (block.type === 'code') {
-            return <code>{block.text}</code>;
+    // const blockToHTML = (block) => {
+    //     console.log(block);
+    //     if (block.type === 'code') {
+    //         return <code>{block.text}</code>;
+    //     }
+    // };
+
+    // const entityToHTML = (entity, originalText) => {
+    //     console.log(entity);
+
+    //     if (entity.type === 'IMAGE') {
+    //         const { src, alt, width, height } = entity.data;
+    //         return `<img src="${src}" alt="${alt}" width="${width}" height="${height}" />`;
+    //     } else if (entity.type === 'LINK') {
+    //         const { url} = entity.data;
+    //         return `<a href="${url}">${originalText}</a>`;
+    //     }
+
+
+    //     return originalText;
+    // };
+
+
+
+    // const options = {
+    //     blockToHTML,
+    //     entityToHTML,
+    // };
+
+
+
+    // useEffect(() => {
+    //     getData();
+
+    //     const html = convertToHTML(options)(editorState.getCurrentContent());
+    //     setConvertedContent(html);
+
+
+
+    // }, [editorState]);
+
+
+    const getBlockStyle = (data) => {
+        let styles = '';
+        Object.entries(data).forEach(([key, value]) => {
+            if (value) {
+                styles += `${key}:${value},`;
+            }
+        });
+        return `{{${styles}}}`;
+    };
+
+
+    function getSectionText(text) {
+        if (text && text.length > 0) {
+            const chars = text.map((ch) => {
+                switch (ch) {
+                    case '\n':
+                        return '<br />';
+                    case '&':
+                        return '&amp;';
+                    case '<':
+                        return '&lt;';
+                    case '>':
+                        return '&gt;';
+                    default:
+                        return ch;
+                }
+            });
+            return chars.join('');
         }
-        // Handle other block types if needed
-    };
+        return '';
+    }
 
-    const options = {
-        blockToHTML,
-    };
-
-    // ...
 
     useEffect(() => {
         getData();
 
-        const html = convertToHTML(options)(editorState.getCurrentContent());
-        setConvertedContent(html);
+        const rawContentState = convertToRaw(editorState.getCurrentContent());
+
+        const markup = draftToHtml(rawContentState, {
+            blockStyleFn: (block) => getBlockStyle(block.data),
+            customInlineFn: getSectionText,
+        });
+
+        setConvertedContent(markup);
+
+
 
     }, [editorState]);
 
+    const handleImageUpload = async (file) => {
 
-    const sate = () => {
-        console.log(convertedContent);
-    }
+        return new Promise((resolve, reject) => {
+            var reader = new window.FileReader();
+            reader.onloadend = () => {
+                const formData = new FormData();
+                formData.append('image', file);
+                axios.post('/saveimg', formData)
+
+                    .then((data) => {
+                        console.log(data);
+                        console.log('Uploaded Data', data);
+                        const { imageLink } = data.data;
+                        console.log(imageLink);
+                        resolve({ data: { link: imageLink } });
+                    });
+            }
+            reader.readAsDataURL(file);
+        });
+    };
+
+
+
+
+
+    const [open, setOpen] = React.useState(false);
+    const [scroll, setScroll] = React.useState('paper');
+
+    const handleClickOpen = (scrollType) => () => {
+        setOpen(true);
+        setScroll(scrollType);
+    };
+
+    const handleClose = () => {
+        setOpen(false);
+    };
+
+    const descriptionElementRef = React.useRef(null);
+    React.useEffect(() => {
+        if (open) {
+            const { current: descriptionElement } = descriptionElementRef;
+            if (descriptionElement !== null) {
+                descriptionElement.focus();
+            }
+        }
+    }, [open]);
+
+    const [categoryName, setCategoryName] = useState("");
+    const [categoryDesc, setCategoryDesc] = useState("");
+    const [subCategory, setSubCategory] = useState(null);
+    const saveblogcategory = async (e) => {
+        e.preventDefault();
+        const team = {
+            categoryName: categoryName,
+            categoryDesc: categoryDesc,
+            subCategory: subCategory,
+        };
+        console.log(team);
+        try {
+            await axios
+                .post("/addblogcategory", team)
+                .then((res) => {
+                    console.log(res);
+                    toast.success(" Category Added Successfully");
+                    setOpen(false);
+                    setCategoryName('')
+                    setCategoryDesc('')
+                    setSubCategory('')
+                    getData()
+                })
+                .catch((e) => {
+                    toast.error("Category Failed");
+                });
+        } catch (error) {
+            toast.error("Category Failed");
+        }
+    };
+
+
+
+
+
+
+
+
 
 
 
@@ -110,7 +265,7 @@ const AddBlogPost = () => {
     }
 
 
-        // Tags 
+    // Tags 
 
     // Function to handle Enter key press
     const handleTags = (event) => {
@@ -160,9 +315,9 @@ const AddBlogPost = () => {
             const res = axios.post("/addblogpost", formdata);
 
             if (!res) {
-                window.alert("Blog is not Inserted 😂");
+                toast.error("Blog Upload Failed");
             } else {
-                window.alert("Blog is Inserted Successfully 👍");
+                toast.success("Blog Added Successfully");
                 navigate('/allblogpost', { replace: true })
             }
         } catch (e) {
@@ -222,103 +377,27 @@ const AddBlogPost = () => {
         checkSlugAvailability(blogSlug);
     }, [blogSlug]);
 
-    // / upload our own server
-    // uploadCallback = (file) => {
-    //     return new Promise((resolve, reject) => {
-    //        const data = new FormData();
-    //        data.append("storyImage", file)
-    //        axios.post(Upload file API call, data).then(responseImage => {
-    //             resolve({ data: { link: PATH TO IMAGE ON SERVER } });
-    //        })
-    //     });
-    // }
-
-    // const uploadimagecallback = () => {}
-    //  const uploadFile = (file) => {
-    //     return new Promise(
-    //         (resolve, reject) => {
-
-
-    //             const xhr = new XMLHttpRequest();
-    //             xhr.open('POST', 'https://api.imgur.com/3/image');
-    //             xhr.setRequestHeader('Authorization', 'Client-ID 506e1a6dc89c9ab');
-    //             const data = new FormData();
-    //             data.append('image', file);
-    //             xhr.send(data);
-    //             xhr.addEventListener('load', () => {
-    //                 const res = JSON.parse(xhr.responseText);
-    //                 console.log(res);
-    //                 resolve(res);
-    //             })
-
-    //             xhr.addEventListener('error', () => {
-    //                 const error = JSON.parse(xhr.responseText);
-    //                 console.log(error);
-    //                 reject(error);
-    //             })
-    //         }
-    //     );
-    // }
 
 
 
 
-    const [open, setOpen] = React.useState(false);
-    const [scroll, setScroll] = React.useState('paper');
 
-    const handleClickOpen = (scrollType) => () => {
-        setOpen(true);
-        setScroll(scrollType);
-    };
-
-    const handleClose = () => {
-        setOpen(false);
-    };
-
-    const descriptionElementRef = React.useRef(null);
-    React.useEffect(() => {
-        if (open) {
-            const { current: descriptionElement } = descriptionElementRef;
-            if (descriptionElement !== null) {
-                descriptionElement.focus();
-            }
-        }
-    }, [open]);
-
-    const [categoryName, setCategoryName] = useState("");
-    const [categoryDesc, setCategoryDesc] = useState("");
-    const [subCategory, setSubCategory] = useState(null);
-    const saveblogcategory = async (e) => {
-        e.preventDefault();
-        const team = {
-            categoryName: categoryName,
-            categoryDesc: categoryDesc,
-            subCategory: subCategory,
-        };
-        console.log(team);
-        try {
-            await axios
-                .post("/addblogcategory", team)
-                .then((res) => {
-                    console.log(res);
-                    window.alert("Blog Category Added Successfully");
-                    setOpen(false);
-                    setCategoryName('')
-                    setCategoryDesc('')
-                    setSubCategory('')
-                    getData()
-                })
-                .catch((e) => {
-                    console.log(e);
-                });
-        } catch (error) {
-            console.log(error);
-        }
-    };
 
     return (
         <>
             <div class="container-scroller">
+                <ToastContainer
+                    position="top-right"
+                    autoClose={5000}
+                    hideProgressBar={false}
+                    newestOnTop={false}
+                    closeOnClick
+                    rtl={false}
+                    pauseOnFocusLoss
+                    draggable
+                    pauseOnHover
+                    theme="dark"
+                />
                 <nav class="navbar default-layout-navbar col-lg-12 col-12 p-0 fixed-top d-flex flex-row">
                     <div class="text-center navbar-brand-wrapper d-flex align-items-center justify-content-center">
                         <a class="navbar-brand brand-logo" href="">
@@ -392,14 +471,12 @@ const AddBlogPost = () => {
                                                             toolbarClassName="toolbarClassName"
                                                             wrapperClassName="wrapperClassName"
                                                             editorClassName="editorClassName"
-                                                        // toolbar={{
-                                                        //     image: {
-                                                        //         uploadCallback: uploadFile,
-                                                        //         alt: { present: true, mandatory: false },
-                                                        //         previewImage: true,
-                                                        //         inputAccept: 'image/gif,image/jpeg,image/jpg,image/png,image/svg',
-                                                        //     }
-                                                        // }}
+                                                            toolbar={{
+                                                                image: {
+                                                                    uploadCallback: handleImageUpload,
+                                                                    alt: { present: true, mandatory: false },
+                                                                },
+                                                            }}
                                                         />
                                                     </div>
 
@@ -506,7 +583,7 @@ const AddBlogPost = () => {
                                                                 >
                                                                     <div class="dash-content px-3" >
                                                                         <div class="card rounded-0">
-                                   
+
                                                                             <form class="form" >
                                                                                 <div class="group">
                                                                                     <input
@@ -589,7 +666,7 @@ const AddBlogPost = () => {
                                                         </div>
 
                                                         <div class="group mt-3">
-                                                        <input
+                                                            <input
                                                                 type="text"
                                                                 onKeyDown={handleTags}
                                                             />

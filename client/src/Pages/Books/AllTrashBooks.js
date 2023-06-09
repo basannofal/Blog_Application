@@ -2,21 +2,24 @@ import axios from "axios";
 import React, { useEffect, useState } from "react";
 import { Link, NavLink } from "react-router-dom";
 import Sidebars from "../../Layout/Sidebars";
+import { toast, ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
-const AllNames = () => {
+
+const AllTrashBooks = () => {
   const [categoryFilter, setCategoryFilter] = useState("");
-  const [NameCategory, setNameCategory] = useState([]);
-  const [names, setNames] = useState([]);
+  const [BookCategory, setBookCategory] = useState([]);
+  const [Books, setBooks] = useState([]);
   const [searchFilter, setSearchFilter] = useState("");
   const [currentPage, setCurrentPage] = useState(0);
-  const [totalNames, setTotalNames] = useState(0);
+  const [TotalBooks, setTotalBooks] = useState(0);
 
 
-  const getNames = async () => {
+  const getBooks = async () => {
     try {
-      const res = await axios.get('/getnames');
-      setNames(res.data)
-      setTotalNames(res.data.length);
+      const res = await axios.get('/gettrashbooks');
+      setBooks(res.data)
+      setTotalBooks(res.data.length);
     } catch (err) {
       console.log(err);
     }
@@ -25,8 +28,8 @@ const AllNames = () => {
 
   const getData = async () => {
     try {
-      const res = await axios.get(`/getnamescategory`);
-      setNameCategory(res.data);
+      const res = await axios.get(`/getbookcategory`);
+      setBookCategory(res.data);
       console.log(res.data);
     } catch (error) {
       console.log(error);
@@ -35,58 +38,104 @@ const AllNames = () => {
 
 
   useEffect(() => {
-    getNames();
+    getBooks();
     getData();
   }, []);
 
-  const trashNames = async (id) => {
-    try {
-      const res = await axios.patch(`/trashnames/${id}`);
-      getNames();
-    } catch (error) {
-      window.alert(error);
-    }
-  };
 
-  const [filterNames, setfilterNames] = useState(names);
-  const filterBlogPosts = () => {
+  const [filterBooks, setfilterBooks] = useState(Books);
+  const filterBook = () => {
     const searchTerm = searchFilter.toLowerCase();
-    const filterednames = names.filter((item) => {
-      const name1 = item.name_lang1.toLowerCase().includes(searchTerm);
-      const name2 = item.name_lang2.toLowerCase().startsWith(searchTerm);
-      const nameMeaning = item.name_meaning_lang1.toLowerCase().startsWith(searchTerm);
-      const nameGender = item.name_gender.toLowerCase().startsWith(searchTerm);
+    const filteredBooks = Books.filter((item) => {
+      const title = item.book_title.toLowerCase().includes(searchTerm);
+      const author = item.book_author.toLowerCase().startsWith(searchTerm);
+      const bookdesc = item.book_description.toLowerCase().startsWith(searchTerm);
 
       // Apply category filter
-      const categoryMatches = categoryFilter === "" || item.name_category == categoryFilter;
+      const categoryMatches = categoryFilter === "" || item.books_category == categoryFilter;
 
-      return (name1 || name2 || nameMeaning || nameGender) && categoryMatches;
+      return (title || author || bookdesc) && categoryMatches;
     });
-    setfilterNames(filterednames);
+    setfilterBooks(filteredBooks);
   };
 
   useEffect(() => {
-    filterBlogPosts();
-  }, [searchFilter, categoryFilter, names]);
+    filterBook();
+  }, [searchFilter, categoryFilter, Books]);
 
 
   const itemPerPage = 10;
 
-  const numberOfPage = Math.ceil(filterNames.length / itemPerPage);
+  const numberOfPage = Math.ceil(filterBooks.length / itemPerPage);
   const pageIndex = Array.from({ length: numberOfPage }, (_, idx) => idx + 1);
 
   const handlePageChange = (pageNumber) => {
     setCurrentPage(pageNumber);
   };
 
-  const rows = filterNames.slice(
+  const rows = filterBooks.slice(
     currentPage * itemPerPage,
     (currentPage + 1) * itemPerPage
   );
 
+
+
+  const trashBackBook = async (id) => {
+    try {
+      const res = await axios.patch(`/trashbackbook/${id}`);
+      getBooks();
+    } catch (error) {
+      window.alert(error);
+    }
+  };
+
+  const DeleteBook = async (id) => {
+    try {
+      const res = await axios.delete(`/deletebook/${id}`);
+      toast.success("Book Delete Successfully");
+      getBooks();
+    } catch (error) {
+      window.alert(error);
+    }
+  }
+
+
+
+  const DeleteAlert = async (id) => {
+    let title;
+    try {
+      const res = await axios.get(`/getbookdetail/${id}`);
+      title = res.data[0].book_title;
+    } catch (error) {
+      window.alert(error);
+    }
+    let x = window.prompt(`Enter Title Name = ${title} `, '');
+    if (x == title) {
+      DeleteBook(id);
+    } else {
+      window.alert("Oops ! Title is Incorrect")
+    }
+  }
+
+
+
+
+
   return (
     <>
       <div class="container-scroller">
+        <ToastContainer
+          position="top-right"
+          autoClose={5000}
+          hideProgressBar={false}
+          newestOnTop={false}
+          closeOnClick
+          rtl={false}
+          pauseOnFocusLoss
+          draggable
+          pauseOnHover
+          theme="dark"
+        />
         <nav class="navbar default-layout-navbar col-lg-12 col-12 p-0 fixed-top d-flex flex-row">
           <div class="text-center navbar-brand-wrapper d-flex align-items-center justify-content-center">
             <a class="navbar-brand brand-logo" href="">
@@ -139,7 +188,7 @@ const AllNames = () => {
                       style={{ display: "flex", justifyContent: "right" }}
                     >
                       <NavLink
-                        to={`/addnames`}
+                        to={`/addbook`}
                         style={{ textDecoration: "none" }}
                       >
                         <button
@@ -153,7 +202,7 @@ const AllNames = () => {
                             class="uil uil-plus mr-2"
                             style={{ backgroundColor: "#007bff" }}
                           ></i>
-                          New Name
+                          New Book
                         </button>
                       </NavLink>
                     </div>
@@ -161,14 +210,14 @@ const AllNames = () => {
 
                   <div class="activity">
 
-                    <p class="mb-3" style={{ fontSize: 20, fontWeight: "bold" }}>All Names </p>
+                    <p class="mb-3" style={{ fontSize: 20, fontWeight: "bold" }}>All Books </p>
 
                     <div className="d-flex" style={{ justifyContent: "space-between", alignItems: "center" }}>
 
                       <div className="d-flex" style={{ fontSize: "14px" }}>
-                        <NavLink className='text-decoration-none text-dark' onClick={getNames}><p>All ({totalNames})</p></NavLink>
+                        <NavLink to={'/allbooks'} className='text-decoration-none'><p className="text-primary"> <i class="bi bi-arrow-left"></i> &nbsp; Back</p></NavLink>
                         <p className="mx-2">|</p>
-                        <NavLink to={'/alltrashnames'} className='text-decoration-none'><p className="text-danger">Trash</p></NavLink>
+                        <p className="text-danger" >Trash </p>
                       </div>
 
                       <div class="group">
@@ -187,7 +236,7 @@ const AllNames = () => {
                           }}
                         >
                           <option value=''>All categories</option>
-                          {NameCategory.map((category) => (
+                          {BookCategory.map((category) => (
                             <option key={category.id} value={category.id}>
                               {category.category_name}
                             </option>
@@ -200,15 +249,14 @@ const AllNames = () => {
                     <table class="table table-striped" style={{ border: "1px solid #C3C4C7", backgroundColor: "#fff" }}>
                       <thead>
                         <tr>
-                          <th scope="col">Name(1)</th>
-                          <th scope="col">Meaning(1)</th>
-                          <th scope="col">Name(2)</th>
-                          <th scope="col">Meaning(2)</th>
-                          <th scope="col">Descripiton</th>
-                          <th scope="col">Gender</th>
+                          <th scope="col">Thumnail</th>
+                          <th scope="col">PDF</th>
+                          <th scope="col">Title</th>
+                          <th scope="col">Author</th>
+                          <th scope="col">Description</th>
+                          <th scope="col">Download</th>
                           <th scope="col">Category</th>
                           <th scope="col">Date & Time</th>
-                          <th scope="col">Priority</th>
                         </tr>
                       </thead>
                       <tbody style={{ fontSize: '15px' }}>
@@ -222,25 +270,39 @@ const AllNames = () => {
                               return (
                                 <>
                                   <tr className="blog-title">
-                                    <td style={{ width: "10%" }}>
-                                      {e.name_lang1}
+                                    <td>
+                                      {
+                                        e.book_thumbnail != '' ?
+                                          <img src={(`./uploads/Books/PDF/${e.book_thumbnail}`)} style={{ height: "50px", width: "50px" }} />
+                                          : <p>Not Found</p>
+                                      }
+                                    </td>
+                                    <td>
+                                      {
+                                        e.book_pdf != '' ?
+                                          <img src={require(`../../Assets/Images/pdf.png`)} style={{ height: "50px", width: "50px" }} />
+                                          : <p>Not Found</p>
+                                      }
+                                    </td>
+                                    <td style={{ width: "15%" }}>
+                                      {e.book_title}
                                       <p className="p-0 m-0 tred " style={{ fontSize: '14px' }}>
                                         <div className="d-flex">
-                                          <NavLink to={`/editnames/${e.id}`}  className='text-decoration-none'><p className="p-0 m-0">&nbsp;Edit | </p></NavLink>
-                                          <p className="text-danger p-0 m-0" onClick={() => { trashNames(e.id) }}>&nbsp;Trash</p>
+
+                                          <p className=" p-0 m-0" onClick={() => { trashBackBook(e.id) }}> Restore</p>
+                                          <p className="mx-1 m-0 p-0">|</p>
+                                          <p className="p-0 m-0 text-danger" onClick={() => { DeleteAlert(e.id) }}>Permenently Delete </p>
                                         </div>
                                       </p>
                                     </td>
-                                    <td>{e.name_meaning_lang1}</td>
-                                    <td> {e.name_lang2}</td>
-                                    <td>{e.name_meaning_lang2}</td>
-                                    <td>{e.name_description}</td>
-                                    <td>{e.name_gender}</td>
+                                    <td> {e.book_author}</td>
+                                    <td>{e.book_description}</td>
+                                    <td>{e.book_isdownload == 0 ? <p>No</p> : <p>Yes</p>}</td>
 
 
                                     <td>
-                                      {NameCategory.map((x) => {
-                                        if (e.name_category === x.id) {
+                                      {BookCategory.map((x) => {
+                                        if (e.books_category === x.id) {
                                           flag = 1;
                                           return x.category_name;
                                         }
@@ -249,10 +311,9 @@ const AllNames = () => {
                                     </td>
                                     <td>
                                       <p className="m-0 p-0"> {e.upload_date}</p>
-                                      <p className="m-0 p-0"> {e.upload_time}</p>
+                                      <p className="m-0 p-0"> {e.book_publish_time}</p>
 
                                     </td>
-                                    <td>{e.name_priority}</td>
 
                                   </tr >
                                 </>
@@ -260,6 +321,7 @@ const AllNames = () => {
                             })
                           : ""}
                       </tbody>
+
                     </table>
                   </div>
                   <div
@@ -317,4 +379,4 @@ const AllNames = () => {
   );
 }
 
-export default AllNames
+export default AllTrashBooks

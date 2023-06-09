@@ -18,6 +18,8 @@ import Radio from '@mui/material/Radio';
 import RadioGroup from '@mui/material/RadioGroup';
 import FormControl from '@mui/material/FormControl';
 import FormLabel from '@mui/material/FormLabel';
+import { toast, ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 
 const AddNames = () => {
@@ -30,6 +32,8 @@ const AddNames = () => {
     const [nameGender, setNameGender] = useState('male');
     const [nameCategory, setNameCategory] = useState('');
     const [namePriority, setNamePriority] = useState(1);
+    const [nameMeaning2, setNameMeaning2] = useState('');
+    const [nameContent, setNameContent] = useState('');
 
     // const [blogStatus, setBlogStatus] = useState(1);
 
@@ -59,29 +63,31 @@ const AddNames = () => {
         e.preventDefault();
 
         try {
-      
+
 
             const names = {
                 nameLang1: nameLang1,
                 nameDesc: nameDesc,
                 nameLang2: nameLang2,
                 nameMeaning: nameMeaning,
+                nameMeaning2: nameMeaning2,
+                nameContent: nameContent,
                 nameGender: nameGender,
                 nameCategory: nameCategory,
                 namePriority: namePriority,
-              }
+            }
 
 
             const res = axios.post("/addnamepost", names);
 
             if (!res) {
-                window.alert("name is not Inserted 😂");
+                toast.error("Name Upload Failed");
             } else {
-                window.alert("name is Inserted Successfully 👍");
+                toast.success("Name Added Successfully");
                 navigate('/allnames', { replace: true })
             }
         } catch (e) {
-            console.log(e);
+            toast.error("Name Upload Failed");
         }
     };
 
@@ -123,7 +129,7 @@ const AddNames = () => {
                 .post("/addnamescategory", team)
                 .then((res) => {
                     console.log(res);
-                    window.alert("Names Category Added Successfully");
+                    toast.success(" Category Added Successfully");
                     setOpen(false);
                     setCategoryName('')
                     setCategoryDesc('')
@@ -131,10 +137,10 @@ const AddNames = () => {
                     getData()
                 })
                 .catch((e) => {
-                    console.log(e);
+                    toast.error("Category Failed");
                 });
         } catch (error) {
-            console.log(error);
+            toast.error("Category Failed");
         }
     };
 
@@ -203,6 +209,18 @@ const AddNames = () => {
     return (
         <>
             <div class="container-scroller">
+                <ToastContainer
+                    position="top-right"
+                    autoClose={5000}
+                    hideProgressBar={false}
+                    newestOnTop={false}
+                    closeOnClick
+                    rtl={false}
+                    pauseOnFocusLoss
+                    draggable
+                    pauseOnHover
+                    theme="dark"
+                />
                 <nav class="navbar default-layout-navbar col-lg-12 col-12 p-0 fixed-top d-flex flex-row">
                     <div class="text-center navbar-brand-wrapper d-flex align-items-center justify-content-center">
                         <a class="navbar-brand brand-logo" href="">
@@ -268,6 +286,18 @@ const AddNames = () => {
                                                         <label for="name">Name (language 1)</label>
                                                     </div>
 
+                                                    <div class="group mt-2">
+                                                        <input
+                                                            placeholder=""
+                                                            type="text"
+                                                            value={nameMeaning}
+                                                            onChange={(e) => {
+                                                                setNameMeaning(e.target.value);
+                                                            }}
+                                                            required
+                                                        />
+                                                        <label for="name">Name Meaning (language 1)</label>
+                                                    </div>
 
                                                     <div class="group mt-2">
                                                         <input
@@ -282,18 +312,17 @@ const AddNames = () => {
                                                         <label for="name">Name (Language 2)</label>
                                                     </div>
 
-
                                                     <div class="group mt-2">
                                                         <input
                                                             placeholder=""
                                                             type="text"
-                                                            value={nameMeaning}
+                                                            value={nameMeaning2}
                                                             onChange={(e) => {
-                                                                setNameMeaning(e.target.value);
+                                                                setNameMeaning2(e.target.value);
                                                             }}
                                                             required
                                                         />
-                                                        <label for="name">Name Meaning</label>
+                                                        <label for="name">Name Meaning (language 2)</label>
                                                     </div>
 
                                                     <div class="group mt-2">
@@ -424,6 +453,20 @@ const AddNames = () => {
                                                         </Dialog>
 
 
+
+                                                        <div class="group mt-2">
+                                                            <textarea
+                                                                placeholder=""
+                                                                type="text"
+                                                                value={nameContent}
+                                                                onChange={(e) => {
+                                                                    setNameContent(e.target.value);
+                                                                }}
+                                                                required
+                                                            />
+                                                            <label for="name">Name Content</label>
+                                                        </div>
+
                                                         <div>
                                                             <FormControl >
                                                                 <FormLabel id="demo-radio-buttons-group-label">Gender</FormLabel>
@@ -469,7 +512,7 @@ const AddNames = () => {
                                                                     Publish
                                                                 </button>
                                                             </div>
-                                    
+
                                                         </div>
 
                                                     </div>

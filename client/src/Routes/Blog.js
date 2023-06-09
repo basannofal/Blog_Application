@@ -27,11 +27,11 @@ function Blog() {
             </Routes>
 
             <Routes>
-                <Route path="/editblogpost" element={<EditBlogPost />}></Route>
+                <Route path="/editblogpost/:id" element={<EditBlogPost />}></Route>
             </Routes>
 
             <Routes>
-                <Route path="/preview/:slug" element={<PreviewPost />}></Route>
+                <Route path="/preview/:id" element={<PreviewPost />}></Route>
             </Routes>
 
 

@@ -2,6 +2,8 @@ import axios from "axios";
 import React, { useEffect, useState } from "react";
 import { Link, NavLink } from "react-router-dom";
 import Sidebars from "../../Layout/Sidebars";
+import { toast, ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 const AllTrashNames = () => {
     const [categoryFilter, setCategoryFilter] = useState("");
@@ -44,7 +46,7 @@ const AllTrashNames = () => {
         const filterednames = names.filter((item) => {
             const name1 = item.name_lang1.toLowerCase().includes(searchTerm);
             const name2 = item.name_lang2.toLowerCase().startsWith(searchTerm);
-            const nameMeaning = item.name_meaning.toLowerCase().startsWith(searchTerm);
+            const nameMeaning = item.name_meaning_lang1.toLowerCase().startsWith(searchTerm);
             const nameGender = item.name_gender.toLowerCase().startsWith(searchTerm);
 
             // Apply category filter
@@ -76,47 +78,60 @@ const AllTrashNames = () => {
 
 
 
-    const trashBackNames= async (id) => {
+    const trashBackNames = async (id) => {
         try {
-          const res = await axios.patch(`/trashbacknames/${id}`);
-          getNames();
+            const res = await axios.patch(`/trashbacknames/${id}`);
+            getNames();
         } catch (error) {
-          window.alert(error);
+            window.alert(error);
         }
-      };
+    };
 
-      const DeleteName = async (id) => {
+    const DeleteName = async (id) => {
         try {
             const res = await axios.delete(`/deletename/${id}`);
+            toast.success("Name Delete Successfully");
             getNames();
-          } catch (error) {
+        } catch (error) {
             window.alert(error);
-          }
-      }
-    
+        }
+    }
 
 
-      const DeleteAlert = async (id) =>{
+
+    const DeleteAlert = async (id) => {
         let title;
         try {
             const res = await axios.get(`/getnamedetail/${id}`);
             title = res.data[0].name_lang1;
-          } catch (error) {
+        } catch (error) {
             window.alert(error);
         }
-         let x =window.prompt(`Enter Title Name = ${title} `, '');
-         if(x==title){
+        let x = window.prompt(`Enter Title Name = ${title} `, '');
+        if (x == title) {
             DeleteName(id);
-         }else{
+        } else {
             window.alert("Oops ! Title is Incorrect")
-         }
-      }
-    
+        }
+    }
+
 
 
     return (
         <>
             <div class="container-scroller">
+                <ToastContainer
+                    position="top-right"
+                    autoClose={5000}
+                    hideProgressBar={false}
+                    newestOnTop={false}
+                    closeOnClick
+                    rtl={false}
+                    pauseOnFocusLoss
+                    draggable
+                    pauseOnHover
+                    theme="dark"
+                />
                 <nav class="navbar default-layout-navbar col-lg-12 col-12 p-0 fixed-top d-flex flex-row">
                     <div class="text-center navbar-brand-wrapper d-flex align-items-center justify-content-center">
                         <a class="navbar-brand brand-logo" href="">
@@ -228,11 +243,13 @@ const AllTrashNames = () => {
                                         </div>
 
                                         <table class="table table-striped" style={{ border: "1px solid #C3C4C7", backgroundColor: "#fff" }}>
+
                                             <thead>
                                                 <tr>
-                                                    <th scope="col">Name</th>
-                                                    <th scope="col">Name</th>
-                                                    <th scope="col">Meaning</th>
+                                                    <th scope="col">Name(1)</th>
+                                                    <th scope="col">Meaning(1)</th>
+                                                    <th scope="col">Name(2)</th>
+                                                    <th scope="col">Meaning(2)</th>
                                                     <th scope="col">Descripiton</th>
                                                     <th scope="col">Gender</th>
                                                     <th scope="col">Category</th>
@@ -251,7 +268,7 @@ const AllTrashNames = () => {
                                                             return (
                                                                 <>
                                                                     <tr className="blog-title">
-                                                                        <td style={{ width: "15%" }}>
+                                                                        <td style={{ width: "10%" }}>
                                                                             {e.name_lang1}
                                                                             <p className="p-0 m-0 tred " style={{ fontSize: '14px' }}>
                                                                                 <div className="d-flex">
@@ -262,8 +279,9 @@ const AllTrashNames = () => {
                                                                                 </div>
                                                                             </p>
                                                                         </td>
+                                                                        <td>{e.name_meaning_lang1}</td>
                                                                         <td> {e.name_lang2}</td>
-                                                                        <td>{e.name_meaning}</td>
+                                                                        <td>{e.name_meaning_lang2}</td>
                                                                         <td>{e.name_description}</td>
                                                                         <td>{e.name_gender}</td>
 

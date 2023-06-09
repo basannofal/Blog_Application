@@ -1,6 +1,6 @@
 import axios from "axios";
 import React, { useEffect, useState } from "react";
-import { NavLink, useLocation, useNavigate } from "react-router-dom";
+import { NavLink, useParams, useNavigate } from "react-router-dom";
 import Sidebars from "../../Layout/Sidebars";
 import 'react-draft-wysiwyg/dist/react-draft-wysiwyg.css';
 import Button from '@mui/material/Button';
@@ -20,8 +20,10 @@ import FormControl from '@mui/material/FormControl';
 import FormLabel from '@mui/material/FormLabel';
 
 const EditNames = () => {
+
     const navigate = useNavigate();
-    const location = useLocation()
+    const {id} = useParams("");
+
     // Store Input Date in this State
     const [nameLang1, setNameLang1] = useState('');
     const [nameDesc, setNameDesc] = useState('');
@@ -31,6 +33,8 @@ const EditNames = () => {
     const [nameCategory, setNameCategory] = useState('');
     const [namePriority, setNamePriority] = useState(null);
     const [dataFetched, setDataFetched] = useState(false);
+    const [nameMeaning2, setNameMeaning2] = useState('');
+    const [nameContent, setNameContent] = useState('');
 
     // const [blogStatus, setBlogStatus] = useState(1);
 
@@ -53,11 +57,13 @@ const EditNames = () => {
     //get Name detail
     const getNameDetail = async () => {
         try {
-            const res = await axios.get(`/getnamedetail/${location.state.id}`);
+            const res = await axios.get(`/getnamedetail/${id}`);
             console.log(res.data[0])
             setNameLang1(res.data[0].name_lang1)
             setNameLang2(res.data[0].name_lang2)
-            setNameMeaning(res.data[0].name_meaning)
+            setNameMeaning(res.data[0].name_meaning_lang1)
+            setNameMeaning2(res.data[0].name_meaning_lang2)
+            setNameContent(res.data[0].name_content)
             setNameDesc(res.data[0].name_description)
             setNameCategory(res.data[0].name_category)
             setNameGender(res.data[0].name_gender)
@@ -88,13 +94,15 @@ const EditNames = () => {
                 nameDesc: nameDesc,
                 nameLang2: nameLang2,
                 nameMeaning: nameMeaning,
+                nameMeaning2: nameMeaning2,
+                nameContent: nameContent,
                 nameGender: nameGender,
                 nameCategory: nameCategory,
                 namePriority: namePriority,
             }
 
 
-            const res = axios.patch(`/editname/${location.state.id}`, names);
+            const res = axios.patch(`/editname/${id}`, names);
 
             if (!res) {
                 window.alert("name is not Inserted 😂");
@@ -290,6 +298,18 @@ const EditNames = () => {
                                                         <label for="name">Name (language 1)</label>
                                                     </div>
 
+                                                    <div class="group mt-2">
+                                                        <input
+                                                            placeholder=""
+                                                            type="text"
+                                                            value={nameMeaning}
+                                                            onChange={(e) => {
+                                                                setNameMeaning(e.target.value);
+                                                            }}
+                                                            required
+                                                        />
+                                                        <label for="name">Name Meaning (language 2)</label>
+                                                    </div>
 
                                                     <div class="group mt-2">
                                                         <input
@@ -305,19 +325,19 @@ const EditNames = () => {
                                                     </div>
 
 
+
                                                     <div class="group mt-2">
                                                         <input
                                                             placeholder=""
                                                             type="text"
-                                                            value={nameMeaning}
+                                                            value={nameMeaning2}
                                                             onChange={(e) => {
-                                                                setNameMeaning(e.target.value);
+                                                                setNameMeaning2(e.target.value);
                                                             }}
                                                             required
                                                         />
-                                                        <label for="name">Name Meaning</label>
+                                                        <label for="name">Name Meaning (language 2)</label>
                                                     </div>
-
                                                     <div class="group mt-2">
                                                         <textarea
                                                             placeholder=""
@@ -444,6 +464,19 @@ const EditNames = () => {
                                                                 <Button variant="contained" onClick={savenamescategory}>Submit</Button>
                                                             </DialogActions>
                                                         </Dialog>
+
+                                                        <div class="group mt-2">
+                                                            <textarea
+                                                                placeholder=""
+                                                                type="text"
+                                                                value={nameContent}
+                                                                onChange={(e) => {
+                                                                    setNameContent(e.target.value);
+                                                                }}
+                                                                required
+                                                            />
+                                                            <label for="name">Name Content</label>
+                                                        </div>
 
 
                                                         <div>

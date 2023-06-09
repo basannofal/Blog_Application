@@ -8,6 +8,8 @@ const addnames = async (req, res) => {
         nameDesc,
         nameLang2,
         nameMeaning,
+        nameMeaning2,
+        nameContent,
         nameGender,
         nameCategory,
         namePriority
@@ -24,6 +26,8 @@ const addnames = async (req, res) => {
         nameDesc,
         nameLang2,
         nameMeaning,
+        nameMeaning2,
+        nameContent,
         nameGender,
         nameCategory,
         currentDate,
@@ -31,7 +35,7 @@ const addnames = async (req, res) => {
         namePriority
     ];
 
-    const q = "INSERT INTO `bg_name_detail`(`name_lang1`, `name_description`, `name_lang2`, `name_meaning`, `name_gender`, `name_category`, `upload_date`, `upload_time`, `name_priority` ) VALUES (?)";
+    const q = "INSERT INTO `bg_name_detail`(`name_lang1`, `name_description`, `name_lang2`, `name_meaning_lang1`, `name_meaning_lang2`, `name_content`, `name_gender`, `name_category`, `upload_date`, `upload_time`, `name_priority` ) VALUES (?)";
 
     conn.query(q, [values], (err, data) => {
         if (err) {
@@ -172,7 +176,7 @@ const Editname = async (req, res) => {
     let currentDate = new Date().toJSON().slice(0, 10);
     let currentTime = new Date().toJSON().slice(11, 19);
 
-    const q = "UPDATE `bg_name_detail` SET `name_lang1`=?, `name_description`= ?, `name_lang2`= ?, `name_meaning`= ?, `name_gender`= ?, `name_category`= ?, `upload_date`= ?, `upload_time`= ?, `name_priority`= ?  WHERE id = ?";
+    const q = "UPDATE `bg_name_detail` SET `name_lang1`=?, `name_description`= ?, `name_lang2`= ?, `name_meaning_lang1`= ? , `name_meaning_lang2`= ? , `name_content`= ? , `name_gender`= ?, `name_category`= ?, `upload_date`= ?, `upload_time`= ?, `name_priority`= ?  WHERE id = ?";
 
 
     const id = req.params.id;
@@ -180,7 +184,9 @@ const Editname = async (req, res) => {
         req.body.nameLang1,
         req.body.nameDesc,
         req.body.nameLang2,
-        req.body.nameMeaning,
+        req.body.nameMeaning,        
+        req.body.nameMeaning2,
+        req.body.nameContent,
         req.body.nameGender,
         req.body.nameCategory,
         currentDate,

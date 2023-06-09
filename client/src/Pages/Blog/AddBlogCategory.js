@@ -2,6 +2,8 @@ import axios from "axios";
 import React, { useEffect, useState } from "react";
 import { NavLink, useNavigate, useParams } from "react-router-dom";
 import Sidebars from "../../Layout/Sidebars";
+import { toast, ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 const AddBlogCategory = () => {
   const navigate = useNavigate();
@@ -69,14 +71,14 @@ const AddBlogCategory = () => {
         .post("/addblogcategory", team)
         .then((res) => {
           console.log(res);
-          window.alert("Blog Category Added Successfully");
-          window.location.reload();
+          toast.success("Category Added Successfully");
+          getData()
         })
         .catch((e) => {
-          console.log(e);
+          toast.error("Category Failed");
         });
     } catch (error) {
-      console.log(error);
+      toast.error("Category Failed");
     }
   };
 
@@ -87,6 +89,7 @@ const AddBlogCategory = () => {
       if (window.confirm("Are you sure you want to delete this record")) {
         const res = await axios.delete(`/deleteblogcategory/${id}`);
         getData();
+        toast.success("Category Delete Successfully");
       }
     } catch (error) {
       window.alert(error);
@@ -99,6 +102,18 @@ const AddBlogCategory = () => {
     <>
       <div class="container-scroller">
 
+        <ToastContainer
+          position="top-right"
+          autoClose={5000}
+          hideProgressBar={false}
+          newestOnTop={false}
+          closeOnClick
+          rtl={false}
+          pauseOnFocusLoss
+          draggable
+          pauseOnHover
+          theme="dark"
+        />
         <nav class="navbar default-layout-navbar col-lg-12 col-12 p-0 fixed-top d-flex flex-row">
 
           <div class="text-center navbar-brand-wrapper d-flex align-items-center justify-content-center">
@@ -118,7 +133,7 @@ const AddBlogCategory = () => {
                   <div class="input-group-prepend bg-transparent">
                     <i class="input-group-text border-0 mdi mdi-magnify"></i>
                   </div>
-                  <input type="text" class="form-control bg-transparent border-0" placeholder="Search Blog Category" value={searchFilter} onChange={(e) => {setSearchFilter(e.target.value)}} />
+                  <input type="text" class="form-control bg-transparent border-0" placeholder="Search Blog Category" value={searchFilter} onChange={(e) => { setSearchFilter(e.target.value) }} />
                 </div>
               </form>
             </div>

@@ -26,7 +26,7 @@ function Names() {
             </Routes>
             
             <Routes>
-                <Route  path="/editnames" element={<EditNames />}></Route>
+                <Route  path="/editnames/:id" element={<EditNames />}></Route>
             </Routes>
             
         </>

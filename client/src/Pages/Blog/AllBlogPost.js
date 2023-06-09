@@ -260,8 +260,10 @@ const AllBlogPost = () => {
                                       {e.blog_title}
                                       <p className="p-0 m-0 tred " style={{ fontSize: '14px' }}>
                                         <div className="d-flex">
-                                        <Link to={`/preview/${e.blog_slug}`} state={{ id: e.id, content: e.blog_content }} className='text-decoration-none'><p className="p-0 m-0 text-success ">View | </p></Link>
-                                          <Link to={`/editblogpost`} state={{ id: e.id, content: e.blog_content }} className='text-decoration-none'><p className="p-0 m-0">&nbsp;Edit | </p></Link>
+                                        <NavLink to={`/preview/${e.id}`}  className='text-decoration-none'><p className="p-0 m-0 text-success ">View | </p></NavLink>
+                                
+                                          
+                                          <NavLink to={`/editblogpost/${e.id}`} state={{  content: e.blog_content }} className='text-decoration-none'><p className="p-0 m-0">&nbsp;Edit | </p></NavLink>
                                           <p className="text-danger p-0 m-0" onClick={() => { trashBlogPost(e.id) }}>&nbsp;Trash</p>
                                         </div>
                                       </p>

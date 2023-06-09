@@ -6,7 +6,7 @@ export const Sidebars = () => {
     const location = useLocation();
     const [isDropdownOpen, setIsDropdownOpen] = useState(false);
     const [isNameDropDown, setIsNameDropDown] = useState(false);
-
+    const [isBookDropdown, setIsBookDropdown] = useState(false);
     const toggleDropdown = () => {
         setIsDropdownOpen(!isDropdownOpen);
     };
@@ -14,7 +14,11 @@ export const Sidebars = () => {
     const NametoggleDropdown = () => {
         setIsNameDropDown(!isNameDropDown);
     };
-    
+
+    const BooktoggleDropdown = () => {
+        setIsBookDropdown(!isBookDropdown);
+    };
+
     return (
         <>
             <nav class="sidebar sidebar-offcanvas" id="sidebar">
@@ -31,7 +35,7 @@ export const Sidebars = () => {
                     </li>
 
                     <li className="nav-item">
-                        <NavLink to={`/allblogpost`}
+                        <NavLink 
                             className="nav-link"
                             data-bs-toggle="collapse"
                             aria-expanded={isDropdownOpen ? 'true' : 'false'}
@@ -118,42 +122,50 @@ export const Sidebars = () => {
 
 
 
-                    <li class="nav-item">
-                        <a class="nav-link" href="pages/forms/basic_elements.html">
-                            <span class="icon-bg"><i class="mdi mdi-format-list-bulleted menu-icon"></i></span>
-                            <span class="menu-title">Forms</span>
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="pages/charts/chartjs.html">
-                            <span class="icon-bg"><i class="mdi mdi-chart-bar menu-icon"></i></span>
-                            <span class="menu-title">Charts</span>
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="pages/tables/basic-table.html">
-                            <span class="icon-bg"><i class="mdi mdi-table-large menu-icon"></i></span>
-                            <span class="menu-title">Tables</span>
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" data-bs-toggle="collapse" href="#auth" aria-expanded="false" aria-controls="auth">
-                            <span class="icon-bg"><i class="mdi mdi-lock menu-icon"></i></span>
-                            <span class="menu-title">User Pages</span>
-                            <i class="menu-arrow"></i>
-                        </a>
-                        <div class="collapse" id="auth">
-                            <ul class="nav flex-column sub-menu">
-                                <li class="nav-item"> <a class="nav-link" href="pages/samples/blank-page.html"> Blank Page </a></li>
-                                <li class="nav-item"> <a class="nav-link" href="pages/samples/login.html"> Login </a></li>
-                                <li class="nav-item"> <a class="nav-link" href="pages/samples/register.html"> Register </a></li>
-                                <li class="nav-item"> <a class="nav-link" href="pages/samples/error-404.html"> 404 </a></li>
-                                <li class="nav-item"> <a class="nav-link" href="pages/samples/error-500.html"> 500 </a></li>
-                            </ul>
-                        </div>
-                    </li>
 
-                    <li class="nav-item sidebar-user-actions">
+
+
+
+                    <li className="nav-item">
+                        <NavLink
+                            className="nav-link"
+                            data-bs-toggle="collapse"
+                            aria-expanded={isBookDropdown ? 'true' : 'false'}
+                            aria-controls="ui-basic"
+                            onClick={BooktoggleDropdown}
+                        >
+                            <span className="icon-bg">
+                                <i className="mdi mdi-book menu-icon"></i>
+                            </span>
+                            <span className="menu-title">Books</span>
+                            <i className={`bi bi-arrow-${isBookDropdown ? 'up' : 'down'}-short menu-arrow`}></i>
+                        </NavLink>
+                    </li>
+                    {isBookDropdown && (
+                        <li className="nav-item ">
+                            <NavLink to={'/allbooks'} className='text-decoration-none '><p className="nav-link m-0 p-1">
+                                <i class="bi bi-arrow-right-short"></i> <span style={{ paddingLeft: '20px' }}> All Books </span>
+                            </p></NavLink>
+                        </li>
+                    )}
+                    {isBookDropdown && (
+                        <li className="nav-item">
+                            <NavLink to={'/addbook'} className='text-decoration-none '><p className="nav-link m-0 p-1">
+                                <i class="bi bi-arrow-right-short"></i> <span style={{ paddingLeft: '20px' }}> Add New </span>
+                            </p></NavLink>
+                        </li>
+                    )}
+                    {isBookDropdown && (
+                        <li className="nav-item">
+                            <NavLink to={'/bookcategory'} className='text-decoration-none'><p className="nav-link m-0 p-1"><i class="bi bi-arrow-right-short"></i> <span style={{ paddingLeft: '20px' }}> Category </span>
+                            </p></NavLink>
+                        </li>
+                    )}
+
+
+
+
+                    <li class="nav-item sidebar-user-actions mt-5">
                         <div class="user-details">
                             <div class="d-flex justify-content-between align-items-center">
                                 <div>

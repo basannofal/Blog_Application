@@ -2,17 +2,21 @@ import axios from "axios";
 import React, { useEffect, useState, useRef } from "react";
 import { NavLink, useLocation, useNavigate, useParams } from "react-router-dom";
 import Sidebars from "../../Layout/Sidebars";
-import { EditorState, convertToRaw, convertFromRaw, ContentState } from 'draft-js';
+import { EditorState, convertToRaw, convertFromRaw, ContentState, Entity } from 'draft-js';
 import { Editor } from 'react-draft-wysiwyg';
 import 'react-draft-wysiwyg/dist/react-draft-wysiwyg.css';
 import { convertToHTML } from 'draft-convert';
 import htmlToDraft from 'html-to-draftjs';
 import slugify from 'slugify';
+import { toast, ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+import draftToHtml from "draftjs-to-html";
 
 
 
 const EditBlogPost = () => {
 
+    const { id } = useParams("")
 
 
     const location = useLocation();
@@ -63,8 +67,8 @@ const EditBlogPost = () => {
 
 
 
-    
-        // Tags 
+
+    // Tags 
 
     // Function to handle Enter key press
     const handleTags = (event) => {
@@ -112,7 +116,7 @@ const EditBlogPost = () => {
     //get blog detail
     const getBlogDetail = async () => {
         try {
-            const res = await axios.get(`/getblogpostdetail/${location.state.id}`);
+            const res = await axios.get(`/getblogpostdetail/${id}`);
             setBlogTitle(res.data[0].blog_title)
             setBlogDesc(res.data[0].blog_description)
             setBlogContent(res.data[0].blog_content)
@@ -156,29 +160,132 @@ const EditBlogPost = () => {
 
 
 
-    const blockToHTML = (block) => {
-        if (block.type === 'code') {
-            return <div><code>{block.text}</code></div>;
+    // const blockToHTML = (block) => {
+    //     if (block.type === 'code') {
+    //         return <div><code>{block.text}</code></div>;
+    //     }
+    //     // Handle other block types if needed
+    // };
+
+    // const entityToHTML = (entity, originalText) => {
+    //     if (entity.type === 'IMAGE') {
+    //         const { src, alt, width, height } = entity.data;
+    //         return `<img src="${src}" alt="${alt}" width="${width}" height="${height}" />`;
+    //     } else if (entity.type === 'LINK') {
+    //         const { url } = entity.data;
+    //         return `<a href="${url}">${originalText}</a>`;
+    //     }
+    //     return originalText;
+    // };
+
+
+
+
+    // const options = {
+    //     blockToHTML,
+    //     entityToHTML,
+    // };
+
+
+
+    // // ...
+
+
+
+
+
+
+    // useEffect(() => {
+    //     const html = convertToHTML(options)(editorState.getCurrentContent());
+    //     setConvertedContent(html);
+    //     console.log(location.state.content);
+    // }, [editorState]);
+
+
+    
+    const getBlockStyle = (data) => {
+        let styles = '';
+        Object.entries(data).forEach(([key, value]) => {
+            if (value) {
+                styles += `${key}:${value},`;
+            }
+        });
+        return `{{${styles}}}`;
+    };
+
+
+    function getSectionText(text) {
+        if (text && text.length > 0) {
+            const chars = text.map((ch) => {
+                switch (ch) {
+                    case '\n':
+                        return '<br />';
+                    case '&':
+                        return '&amp;';
+                    case '<':
+                        return '&lt;';
+                    case '>':
+                        return '&gt;';
+                    default:
+                        return ch;
+                }
+            });
+            return chars.join('');
         }
-        // Handle other block types if needed
-    };
-
-    const options = {
-        blockToHTML,
-    };
-
-    // ...
-
-
+        return '';
+    }
 
 
     useEffect(() => {
-        const html = convertToHTML(options)(editorState.getCurrentContent());
-        setConvertedContent(html);
-        console.log(location.state.content);
+        getData();
+
+        const rawContentState = convertToRaw(editorState.getCurrentContent());
+
+        const markup = draftToHtml(rawContentState, {
+            blockStyleFn: (block) => getBlockStyle(block.data),
+            customInlineFn: getSectionText,
+        });
+
+        setConvertedContent(markup);
+
     }, [editorState]);
 
 
+
+
+    const handleImageUpload = async (file) => {
+        //   const formData = new FormData();
+        //   formData.append('image', file);
+
+        //   try {
+        //     const response = await axios.post('/saveimg', formData);
+        //     const { imageLink } = response.data;
+        //     console.log(imageLink);
+        //     resolve({data:{ link: imageLink } });
+        //     insertImage(imageLink);
+        //   } catch (error) {
+        //     console.log(error);
+        //   }
+
+
+        return new Promise((resolve, reject) => {
+            var reader = new window.FileReader();
+            reader.onloadend = () => {
+                const formData = new FormData();
+                formData.append('image', file);
+                axios.post('/saveimg', formData)
+
+                    .then((data) => {
+                        console.log(data);
+                        console.log('Uploaded Data', data);
+                        const { imageLink } = data.data;
+                        console.log(imageLink);
+                        resolve({ data: { link: imageLink } });
+                    });
+            }
+            reader.readAsDataURL(file);
+        });
+    };
 
 
     // Save the data in database
@@ -201,21 +308,21 @@ const EditBlogPost = () => {
             formdata.append("blogSlug", blogSlug);
             formdata.append("blogStatus", blogStatus);
 
-            const res = axios.patch(`/editblogpost/${location.state.id}`, formdata);
+            const res = axios.patch(`/editblogpost/${id}`, formdata);
 
             if (!res) {
-                window.alert("Blog not Updated 😂");
+                toast.error("Blog Update Failed");
             } else {
-                window.alert("Blog updated Successfully 👍");
+                toast.success("Blog Updated Successfully");
                 navigate('/allblogpost', { replace: true })
             }
         } catch (e) {
-            console.log(e);
+            toast.error("Blog Update Failed");
         }
     };
 
 
-    
+
 
 
     const generateSlug = (blogTitle) => {
@@ -231,7 +338,7 @@ const EditBlogPost = () => {
 
     const checkSlugAvailability = async (slug) => {
         try {
-            const response = await axios.get(`/checkSlugAvailability/${slug}/${location.state.id}`);
+            const response = await axios.get(`/checkSlugAvailability/${slug}/${id}`);
             const { isAvailable } = response.data;
 
             // Handle the response accordingly
@@ -251,17 +358,17 @@ const EditBlogPost = () => {
 
     const incrementSlug = (slug) => {
         const lastChar = slug[slug.length - 1];
-        
+
         if (!isNaN(lastChar)) {
-          // Last character is a number, increment it by 1
-          const newLastChar = parseInt(lastChar, 10) + 1;
-          setBlogSlug(slug.slice(0, -1) + newLastChar);
+            // Last character is a number, increment it by 1
+            const newLastChar = parseInt(lastChar, 10) + 1;
+            setBlogSlug(slug.slice(0, -1) + newLastChar);
         } else {
-          // Last character is an alphabet, append '1' to the slug
-          setBlogSlug(slug + '1');
+            // Last character is an alphabet, append '1' to the slug
+            setBlogSlug(slug + '1');
         }
-      };
-      
+    };
+
 
 
     useEffect(() => {
@@ -272,6 +379,18 @@ const EditBlogPost = () => {
     return (
         <>
             <div class="container-scroller">
+                <ToastContainer
+                    position="top-right"
+                    autoClose={5000}
+                    hideProgressBar={false}
+                    newestOnTop={false}
+                    closeOnClick
+                    rtl={false}
+                    pauseOnFocusLoss
+                    draggable
+                    pauseOnHover
+                    theme="dark"
+                />
                 <nav class="navbar default-layout-navbar col-lg-12 col-12 p-0 fixed-top d-flex flex-row">
                     <div class="text-center navbar-brand-wrapper d-flex align-items-center justify-content-center">
                         <a class="navbar-brand brand-logo" href="">
@@ -342,6 +461,12 @@ const EditBlogPost = () => {
                                                                 toolbarClassName="toolbarClassName"
                                                                 wrapperClassName="wrapperClassName"
                                                                 editorClassName="editorClassName"
+                                                                toolbar={{
+                                                                    image: {
+                                                                        uploadCallback: handleImageUpload,
+                                                                        alt: { present: true, mandatory: false },
+                                                                    },
+                                                                }}
                                                             />
                                                         </div>
                                                         <label for="name">Blog Title</label>
@@ -400,7 +525,7 @@ const EditBlogPost = () => {
 
                                                         <div className="group mb-4">
                                                             <label for="name" className="px-3">Old Image</label>
-                                                            <img src={(`./uploads/Blog/${blogImage}`)} style={{ height: "200px", width: "200px" }} />
+                                                            <img src={(`http://localhost:3000/uploads/Blog/${blogImage}`)} style={{ height: "200px", width: "200px" }} />
                                                         </div>
 
                                                         <div class="group">
@@ -459,7 +584,7 @@ const EditBlogPost = () => {
                                                         </div>
 
                                                         <div class="group">
-                                                        <input
+                                                            <input
                                                                 type="text"
                                                                 onKeyDown={handleTags}
                                                             />
@@ -479,7 +604,7 @@ const EditBlogPost = () => {
                                                         </div>
 
 
-                                                        
+
                                                         <div class="group mt-3">
                                                             <input
                                                                 placeholder=""
